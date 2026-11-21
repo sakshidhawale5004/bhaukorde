@@ -6,7 +6,7 @@
   <title>BHAU KORDE MASALE · Staff CRM & Commerce Admin Hub</title>
   <meta name="description" content="Internal CRM and commerce administration hub for Bhau Korde Masale: product catalog configuration, patron CRM, order pipeline, inquiries, and analytics.">
   <meta name="robots" content="noindex, nofollow">
-  <link rel="icon" href="https://bhaukorde.in/wp-content/uploads/2024/03/LOGO-English.png" type="image/png">
+  <link rel="icon" href="LOGO-English.png" type="image/png">
 
   <!-- Google Fonts: Jost (Headings) & Poppins (Body) & Noto Sans Devanagari -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,9 +27,7 @@
   <div id="authGate" class="auth-gate">
     <div class="auth-card">
       <div class="auth-header">
-        <div class="auth-logo-badge">
-          <i class="bi bi-shield-lock-fill"></i>
-        </div>
+        <img src="LOGO-English.png" alt="Bhau Korde Masale" class="auth-logo-img">
         <h1>Bhau Korde Masale</h1>
         <p>Staff CRM & Commerce Administration Hub</p>
         <span class="auth-badge">Panvel Operations Center</span>
@@ -39,16 +37,19 @@
         <label>
           Staff Username
           <div class="input-box">
-            <i class="bi bi-person"></i>
-            <input type="text" id="authUser" placeholder="admin" required autocomplete="username">
+            <i class="bi bi-person input-icon-left"></i>
+            <input type="text" id="authUser" placeholder="Enter staff username" required autocomplete="username">
           </div>
         </label>
 
         <label>
           Access Password
           <div class="input-box">
-            <i class="bi bi-key"></i>
-            <input type="password" id="authPass" placeholder="••••••••" required autocomplete="current-password">
+            <i class="bi bi-key input-icon-left"></i>
+            <input type="password" id="authPass" placeholder="••••••••••••" required autocomplete="current-password">
+            <button type="button" class="toggle-password-btn" id="togglePasswordBtn" title="Toggle Password Visibility" aria-label="Toggle Password Visibility">
+              <i class="bi bi-eye-slash-fill"></i>
+            </button>
           </div>
         </label>
 
@@ -56,18 +57,13 @@
           <label>
             <input type="checkbox" id="authRem" checked> Remember session
           </label>
-          <span style="color:var(--gold);font-size:11px"><i class="bi bi-patch-check"></i> AES Secured</span>
+          <span style="color:var(--gold);font-size:11px"><i class="bi bi-shield-check"></i> AES Secured</span>
         </div>
 
         <button type="submit" class="auth-btn">
-          <i class="bi bi-box-arrow-in-right"></i> Unlock Staff Console
+          <i class="bi bi-box-arrow-in-right"></i> Sign In to Staff Console
         </button>
       </form>
-
-      <div class="auth-demo-hint">
-        <span>Demo: <b>admin</b> / <b>bhau2026</b></span>
-        <button type="button" id="quickDemoLogin">1-Click Auto Login</button>
-      </div>
     </div>
   </div>
 
@@ -82,9 +78,9 @@
         
         <!-- Brand Identity -->
         <div class="crm-brand">
-          <div class="crm-brand-icon">
-            <i class="bi bi-fire"></i>
-          </div>
+          <a href="index.html" target="_blank" title="Bhau Korde Masale Home">
+            <img src="LOGO-English.png" alt="Bhau Korde Masale" class="crm-brand-logo-img">
+          </a>
           <div class="crm-brand-info">
             <div class="crm-brand-title">BHAU KORDE MASALE</div>
             <div class="crm-brand-sub">
@@ -672,7 +668,28 @@
         </div>
 
         <div class="form-group">
-          <label>Product Image Path / URL</label>
+          <label><i class="bi bi-cloud-arrow-up-fill" style="color:var(--accent)"></i> Upload Product Image from Device</label>
+          <div class="file-upload-zone" id="fileUploadZone">
+            <input type="file" id="prodFormImgFile" accept="image/*" style="display:none">
+            <div class="upload-zone-content">
+              <div class="upload-zone-left">
+                <div class="upload-icon-circle">
+                  <i class="bi bi-image"></i>
+                </div>
+                <div class="upload-text-wrap">
+                  <span class="upload-primary-text">Click to choose image or drag &amp; drop here</span>
+                  <span class="upload-sub-text" id="uploadStatusText">Supports PNG, JPG, JPEG, WEBP (Max 5MB)</span>
+                </div>
+              </div>
+              <button type="button" class="btn-outline" id="btnSelectImage" style="padding:6px 12px;font-size:12px">
+                <i class="bi bi-folder2-open"></i> Browse File
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><i class="bi bi-link-45deg"></i> Or Enter Image Path / URL</label>
           <input type="text" id="prodFormImg" placeholder="images/Special Malvani Masala.png">
         </div>
 
@@ -683,7 +700,7 @@
           </div>
           <div style="font-size:12px;color:var(--muted)">
             <b>Real Image Preview</b><br>
-            Synced from <code>bhau-site/images/</code> or external CDN URL.
+            Synced from uploaded device file or <code>bhau-site/images/</code>.
           </div>
         </div>
 

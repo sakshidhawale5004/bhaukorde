@@ -833,20 +833,29 @@
             sessionStorage.setItem(STORAGE.SESSION, sessionData);
           }
           gate.style.display = "none";
-          toast(`Welcome back, ${user}! Staff CRM unlocked.`);
+          toast(`Welcome back! Staff CRM unlocked.`);
           renderAll();
         } else {
-          toast("Invalid credentials. Try admin / bhau2026", "error");
+          toast("Invalid staff username or password.", "error");
         }
       });
     }
 
-    const demoBtn = document.getElementById("quickDemoLogin");
-    if (demoBtn) {
-      demoBtn.addEventListener("click", function () {
-        document.getElementById("authUser").value = "admin";
-        document.getElementById("authPass").value = "bhau2026";
-        document.getElementById("authForm").dispatchEvent(new Event("submit"));
+    // Toggle password visibility (hidden by default)
+    const togglePassBtn = document.getElementById("togglePasswordBtn");
+    if (togglePassBtn) {
+      togglePassBtn.addEventListener("click", function () {
+        const passInput = document.getElementById("authPass");
+        const icon = togglePassBtn.querySelector("i");
+        if (passInput.type === "password") {
+          passInput.type = "text";
+          icon.className = "bi bi-eye-fill";
+          togglePassBtn.setAttribute("title", "Hide Password");
+        } else {
+          passInput.type = "password";
+          icon.className = "bi bi-eye-slash-fill";
+          togglePassBtn.setAttribute("title", "Show Password");
+        }
       });
     }
 
@@ -1380,6 +1389,40 @@
   // ==========================================================================
   // PRODUCT ACTIONS (CRUD & CONFIG)
   // ==========================================================================
+  function resetUploadZoneStatus() {
+    const fileInput = document.getElementById("prodFormImgFile");
+    if (fileInput) fileInput.value = "";
+    const statusText = document.getElementById("uploadStatusText");
+    if (statusText) statusText.textContent = "Supports PNG, JPG, JPEG, WEBP (Max 5MB)";
+  }
+
+  function handleImageFile(file) {
+    if (!file || !file.type.startsWith("image/")) {
+      toast("Please select a valid image file", "error");
+      return;
+    }
+    if (file.size > 6 * 1024 * 1024) {
+      toast("Image must be smaller than 6MB", "error");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const dataUrl = e.target.result;
+      const imgInput = document.getElementById("prodFormImg");
+      if (imgInput) imgInput.value = dataUrl;
+      updateImgPreview(dataUrl);
+      const statusText = document.getElementById("uploadStatusText");
+      if (statusText) {
+        statusText.innerHTML = `<b style="color:var(--success)">✓ ${esc(file.name)}</b> (${Math.round(file.size / 1024)} KB ready)`;
+      }
+      toast(`Image "${file.name}" uploaded successfully!`);
+    };
+    reader.onerror = function () {
+      toast("Failed to read image file", "error");
+    };
+    reader.readAsDataURL(file);
+  }
+
   function openAddProductModal() {
     state.editingProduct = null;
     document.getElementById("modalProductTitle").textContent = "Add New Spice Remedy / Product";
@@ -1396,6 +1439,7 @@
     document.getElementById("prodFormImg").value = "images/Chiken Lollypop Ready Mix.png";
     document.getElementById("prodFormDesc").value = "";
 
+    resetUploadZoneStatus();
     updateImgPreview("images/Chiken Lollypop Ready Mix.png");
     openModal("productModal");
   }
@@ -1418,6 +1462,16 @@
     document.getElementById("prodFormBestseller").checked = !!p.bestseller;
     document.getElementById("prodFormImg").value = p.img || "";
     document.getElementById("prodFormDesc").value = p.desc || "";
+
+    resetUploadZoneStatus();
+    const statusText = document.getElementById("uploadStatusText");
+    if (statusText && p.img) {
+      if (p.img.startsWith("data:")) {
+        statusText.innerHTML = `<span style="color:var(--accent)">✓ Custom uploaded image active</span>`;
+      } else {
+        statusText.textContent = "Current image: " + p.img;
+      }
+    }
 
     updateImgPreview(p.img);
     openModal("productModal");
@@ -1937,6 +1991,40 @@
     const saveProdBtn = document.getElementById("btnSaveProduct");
     if (saveProdBtn) {
       saveProdBtn.addEventListener("click", saveProductForm);
+    }
+
+    // File Upload Handler (Option to upload image from device)
+    const fileInput = document.getElementById("prodFormImgFile");
+    if (fileInput) {
+      fileInput.addEventListener("change", function (e) {
+        if (e.target.files && e.target.files[0]) {
+          handleImageFile(e.target.files[0]);
+        }
+      });
+    }
+
+    const fileZone = document.getElementById("fileUploadZone");
+    const btnSelectImg = document.getElementById("btnSelectImage");
+    if (fileZone && fileInput) {
+      fileZone.addEventListener("click", function (e) {
+        if (e.target !== fileInput) {
+          fileInput.click();
+        }
+      });
+      fileZone.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        fileZone.classList.add("dragover");
+      });
+      fileZone.addEventListener("dragleave", function (e) {
+        fileZone.classList.remove("dragover");
+      });
+      fileZone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        fileZone.classList.remove("dragover");
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+          handleImageFile(e.dataTransfer.files[0]);
+        }
+      });
     }
 
     // Live image preview input
