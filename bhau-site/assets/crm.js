@@ -490,212 +490,10 @@
     }
   ];
 
-  // Seed Orders
-  const DEFAULT_ORDERS = [
-    {
-      id: "BK-2026-94812",
-      date: "2026-11-20 14:22",
-      customer: "Ganesh Patil",
-      phone: "9820145890",
-      email: "ganesh.patil@gmail.com",
-      city: "Panvel",
-      address: "B-204, Shreeram Residency, Old Panvel, Navi Mumbai 410206",
-      payment: "Prepaid UPI",
-      status: "delivered",
-      total: 1115,
-      items: [
-        { id: "special-malvani-masala", name: "Special Malvani Masala", size: "500 g", qty: 1, price: 475 },
-        { id: "special-bramhni-kala-god-masala", name: "Special Bramhni Kala Goda Masala", size: "200 g", qty: 2, price: 200 },
-        { id: "aamba-lonche", name: "Aamba Lonche", size: "500 g", qty: 1, price: 240 }
-      ]
-    },
-    {
-      id: "BK-2026-88341",
-      date: "2026-11-20 18:45",
-      customer: "Sunita Deshmukh",
-      phone: "9819234567",
-      email: "sunita.d@rediffmail.com",
-      city: "Kamothe",
-      address: "Flat 401, Nilkanth Heights, Sector 7, Kamothe 410209",
-      payment: "WhatsApp Order",
-      status: "shipped",
-      total: 690,
-      items: [
-        { id: "super-sunday-bhajlela-mix-masala", name: "Super Sunday Bhajlela Mix Masala", size: "500 g", qty: 1, price: 450 },
-        { id: "special-kashmiri-chili-powder", name: "Special Kashmiri Chili Powder", size: "200 g", qty: 1, price: 240 }
-      ]
-    },
-    {
-      id: "BK-2026-72109",
-      date: "2026-11-21 09:15",
-      customer: "Rohit Chavan",
-      phone: "9768541230",
-      email: "rohit.chavan@yahoo.com",
-      city: "Thane",
-      address: "12, Vartak Nagar, Pokhran Road No 1, Thane West 400606",
-      payment: "Cash on Delivery",
-      status: "processing",
-      total: 840,
-      items: [
-        { id: "darbari-sunday-mix-masala", name: "Darbari Sunday Mix Masala", size: "200 g", qty: 1, price: 190 },
-        { id: "sagar-ratn-fish-masala", name: "Sagar Ratna Fish Masala", size: "200 g", qty: 2, price: 160 },
-        { id: "suvrna-shudha-halad-powder", name: "Suvrna Shudha Halad Powder", size: "200 g", qty: 1, price: 200 },
-        { id: "limbi-god-lonche", name: "Limbu Goad Lonche", size: "200 g", qty: 1, price: 130 }
-      ]
-    },
-    {
-      id: "BK-2026-61902",
-      date: "2026-11-21 11:30",
-      customer: "Anjali Joshi",
-      phone: "9890123456",
-      email: "anjali.joshi@gmail.com",
-      city: "Pune",
-      address: "Flat 14, Mayur Vihar, Kothrud, Pune 411038",
-      payment: "Prepaid UPI",
-      status: "pending",
-      total: 450,
-      items: [
-        { id: "special-rajdrbari-garam-masala-2", name: "Special Rajdarbari Garam Masala", size: "500 g", qty: 1, price: 450 }
-      ]
-    },
-    {
-      id: "BK-2026-50821",
-      date: "2026-11-21 13:05",
-      customer: "Amit Sawant",
-      phone: "9820556677",
-      email: "amit.sawant@live.com",
-      city: "Dombivli",
-      address: "Shop 4, Tilak Chowk, Dombivli East 421201",
-      payment: "Prepaid UPI",
-      status: "pending",
-      total: 920,
-      items: [
-        { id: "special-koli-aagri-masala", name: "Special Koli Aagri Masala", size: "500 g", qty: 1, price: 500 },
-        { id: "misal-pav-masala", name: "Misal Pav Masala", size: "50 g", qty: 4, price: 180 },
-        { id: "mix-lonche", name: "Mix Lonche", size: "500 g", qty: 1, price: 240 }
-      ]
-    }
-  ];
-
-  // Seed Customers / Patrons
-  const DEFAULT_CUSTOMERS = [
-    {
-      id: "PAT-1001",
-      name: "Rajeshwar Patil",
-      phone: "9820145890",
-      email: "rajeshwar.patil@gmail.com",
-      city: "Panvel",
-      segment: "VIP Patron",
-      ordersCount: 8,
-      lifetimeSpend: 6850,
-      lastOrder: "2026-11-20",
-      notes: "Prefers extra spicy Malvani & Kolhapuri mix. Owns family farm in Raigad."
-    },
-    {
-      id: "PAT-1002",
-      name: "Dr. Snehal Kulkarni",
-      phone: "9819234567",
-      email: "dr.snehal@vashihospital.org",
-      city: "Vashi, Navi Mumbai",
-      segment: "VIP Patron",
-      ordersCount: 6,
-      lifetimeSpend: 5400,
-      lastOrder: "2026-11-18",
-      notes: "Regular monthly buyer of Bramhni Kala Goda Masala and pure halad."
-    },
-    {
-      id: "PAT-1003",
-      name: "Meera Shinde",
-      phone: "9768541230",
-      email: "meera.shinde@rediffmail.com",
-      city: "Thane",
-      segment: "Loyal Buyer",
-      ordersCount: 4,
-      lifetimeSpend: 3240,
-      lastOrder: "2026-11-15",
-      notes: "Orders Aamba God Lonche in 1kg bulk buckets during festivals."
-    },
-    {
-      id: "PAT-1004",
-      name: "Amit Sawant",
-      phone: "9820556677",
-      email: "amit.sawant@live.com",
-      city: "Dombivli",
-      segment: "Loyal Buyer",
-      ordersCount: 3,
-      lifetimeSpend: 2150,
-      lastOrder: "2026-11-21",
-      notes: "Authentic Koli-Agri culinary fan. Orders for weekend family parties."
-    },
-    {
-      id: "PAT-1005",
-      name: "Kavita Parab",
-      phone: "9920334411",
-      email: "kavita.parab@gmail.com",
-      city: "Alibaug",
-      segment: "New Customer",
-      ordersCount: 1,
-      lifetimeSpend: 950,
-      lastOrder: "2026-11-19",
-      notes: "First order of Fish and Malvani masala. Praised the authentic aroma."
-    },
-    {
-      id: "PAT-1006",
-      name: "Sagar Gokhale",
-      phone: "9890123456",
-      email: "sagar.gokhale@gmail.com",
-      city: "Pune",
-      segment: "New Customer",
-      ordersCount: 1,
-      lifetimeSpend: 720,
-      lastOrder: "2026-11-21",
-      notes: "Placed order via WhatsApp online cart."
-    }
-  ];
-
-  // Seed Inquiries
-  const DEFAULT_INQUIRIES = [
-    {
-      id: "INQ-301",
-      date: "2026-11-21 10:14",
-      name: "Mahendra Traders (Pune)",
-      phone: "9822012345",
-      email: "mahendratraders.pune@gmail.com",
-      type: "Distributorship",
-      message: "We run a spice distribution network across Pune and PCMC with 150 retail touchpoints. Interested in carrying Bhau Korde blended spices catalog.",
-      status: "In Discussion"
-    },
-    {
-      id: "INQ-302",
-      date: "2026-11-20 16:30",
-      name: "Sai Catering Services",
-      phone: "9867098765",
-      email: "saicaterers.kalyan@yahoo.in",
-      type: "Bulk Catering",
-      message: "Need 25kg bulk packing of Special Malvani Masala & Super Sunday mix for 3 wedding functions in December.",
-      status: "New Lead"
-    },
-    {
-      id: "INQ-303",
-      date: "2026-11-19 12:40",
-      name: "Priya Varma",
-      phone: "9988776655",
-      email: "priya.varma@gmail.com",
-      type: "Courier Order",
-      message: "Do you courier pickles to Bangalore? Wanted 5 jars of Aamba Goad and Limbu Lonche for family.",
-      status: "Converted"
-    },
-    {
-      id: "INQ-304",
-      date: "2026-11-18 11:20",
-      name: "Hotel Swad Kolhapur",
-      phone: "9766554433",
-      email: "swadkolhapur@gmail.com",
-      type: "Commercial B2B",
-      message: "Commercial sample tasting and wholesale rate quotation required for Chicken Kolhapuri and Mutton mix masale.",
-      status: "New Lead"
-    }
-  ];
+  // Orders, Customers, Inquiries start fresh without mock default info
+  const DEFAULT_ORDERS = [];
+  const DEFAULT_CUSTOMERS = [];
+  const DEFAULT_INQUIRIES = [];
 
   // Central State
   const state = {
@@ -783,11 +581,26 @@
       state.settings = DEFAULT_SETTINGS;
     }
 
+    // Purge any legacy mock seed records from localStorage so the CRM starts completely clean
+    const mockOrderIds = new Set(["BK-2026-94812", "BK-2026-88341", "BK-2026-72109", "BK-2026-61902", "BK-2026-50821"]);
+    const mockCustomerIds = new Set(["PAT-1001", "PAT-1002", "PAT-1003", "PAT-1004", "PAT-1005", "PAT-1006"]);
+    const mockInquiryIds = new Set(["INQ-301", "INQ-302", "INQ-303", "INQ-304"]);
+
+    if (Array.isArray(state.orders)) {
+      state.orders = state.orders.filter(o => o && !mockOrderIds.has(o.id));
+      saveData(STORAGE.ORDERS, state.orders);
+    }
+    if (Array.isArray(state.customers)) {
+      state.customers = state.customers.filter(c => c && !mockCustomerIds.has(c.id));
+      saveData(STORAGE.CUSTOMERS, state.customers);
+    }
+    if (Array.isArray(state.inquiries)) {
+      state.inquiries = state.inquiries.filter(i => i && !mockInquiryIds.has(i.id));
+      saveData(STORAGE.INQUIRIES, state.inquiries);
+    }
+
     // Save initial defaults if missing
     if (!localStorage.getItem(STORAGE.PRODUCTS)) saveData(STORAGE.PRODUCTS, state.products);
-    if (!localStorage.getItem(STORAGE.ORDERS)) saveData(STORAGE.ORDERS, state.orders);
-    if (!localStorage.getItem(STORAGE.CUSTOMERS)) saveData(STORAGE.CUSTOMERS, state.customers);
-    if (!localStorage.getItem(STORAGE.INQUIRIES)) saveData(STORAGE.INQUIRIES, state.inquiries);
     if (!localStorage.getItem(STORAGE.SETTINGS)) saveData(STORAGE.SETTINGS, state.settings);
   }
 
@@ -994,7 +807,7 @@
     if (recentTable) {
       const recent = [...state.orders].reverse().slice(0, 5);
       if (!recent.length) {
-        recentTable.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No orders placed yet.</td></tr>`;
+        recentTable.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:36px 20px;color:var(--muted)"><i class="bi bi-inbox" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.6"></i>No orders received yet.<br><small style="font-size:12px;opacity:0.8">New orders from your website storefront or WhatsApp checkout will appear here.</small></td></tr>`;
       } else {
         recentTable.innerHTML = recent
           .map(
@@ -1170,7 +983,10 @@
     }
 
     if (!items.length) {
-      listWrap.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:36px;color:var(--muted)">No orders match your filter criteria.</td></tr>`;
+      const msg = state.orders.length === 0
+        ? `<i class="bi bi-inbox" style="font-size:32px;display:block;margin-bottom:10px;opacity:0.6"></i>No orders received yet.<br><small style="font-size:12px;opacity:0.8">Orders placed by customers on your website or WhatsApp cart will appear here automatically.</small>`
+        : `No orders match your filter criteria.`;
+      listWrap.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:44px 20px;color:var(--muted)">${msg}</td></tr>`;
       return;
     }
 
@@ -1246,7 +1062,10 @@
     }
 
     if (!items.length) {
-      listWrap.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:36px;color:var(--muted)">No patrons match your search query.</td></tr>`;
+      const msg = state.customers.length === 0
+        ? `<i class="bi bi-people" style="font-size:32px;display:block;margin-bottom:10px;opacity:0.6"></i>No patron profiles recorded yet.<br><small style="font-size:12px;opacity:0.8">Customer details and order histories will automatically appear here as purchases are made.</small>`
+        : `No patrons match your search query.`;
+      listWrap.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:44px 20px;color:var(--muted)">${msg}</td></tr>`;
       return;
     }
 
@@ -1314,7 +1133,10 @@
     }
 
     if (!items.length) {
-      listWrap.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--muted)">No inquiries recorded yet.</td></tr>`;
+      const msg = state.inquiries.length === 0
+        ? `<i class="bi bi-chat-left-text" style="font-size:32px;display:block;margin-bottom:10px;opacity:0.6"></i>No customer inquiries recorded yet.<br><small style="font-size:12px;opacity:0.8">Inquiries submitted via the Contact form or WhatsApp inquiries will be logged here.</small>`
+        : `No inquiries match your filter criteria.`;
+      listWrap.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:44px 20px;color:var(--muted)">${msg}</td></tr>`;
       return;
     }
 
