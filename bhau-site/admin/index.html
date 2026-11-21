@@ -8,10 +8,10 @@
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="../LOGO-English.png" type="image/png">
 
-  <!-- Google Fonts: Jost (Headings) & Poppins (Body) & Noto Sans Devanagari -->
+  <!-- Google Fonts: Playfair Display, Jost, Poppins & Noto Sans Devanagari -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Jost:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap">
   
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -21,47 +21,96 @@
 </head>
 <body>
 
-  <!-- AUTHENTICATION SHIELD -->
+  <!-- ==========================================================================
+       SPLIT-SCREEN AUTHENTICATION GATE (MASALA HERO LEFT, SIGN IN RIGHT)
+       ========================================================================== -->
   <div id="authGate" class="auth-gate">
-    <div class="auth-card">
-      <div class="auth-header">
-        <img src="../LOGO-English.png" alt="Bhau Korde Masale" class="auth-logo-img">
-        <h1>Bhau Korde Masale</h1>
-        <p>Store & Order Administration</p>
-        <span class="auth-badge">Panvel, Navi Mumbai</span>
+    <!-- Left Column: Masala Hero Visual & Bhau Korde Details -->
+    <div class="auth-banner-pane">
+      <div class="auth-banner-top">
+        <a href="../index.html" class="auth-back-link">
+          <i class="bi bi-arrow-left"></i> BACK TO WEBSITE
+        </a>
       </div>
 
-      <form id="authForm" class="auth-form">
-        <label>
-          Username
-          <div class="input-box">
-            <i class="bi bi-person input-icon-left"></i>
-            <input type="text" id="authUser" placeholder="Enter username" required autocomplete="username">
+      <div class="auth-banner-center">
+        <div class="auth-brand-badge-pill">
+          <img src="../LOGO-English.png" alt="Bhau Korde Masale" class="auth-brand-logo-pill">
+          <div class="auth-brand-badge-text">
+            <b>BHAU KORDE MASALE</b>
+            <small>ESTD 1998 · PANVEL</small>
           </div>
-        </label>
-
-        <label>
-          Password
-          <div class="input-box">
-            <i class="bi bi-key input-icon-left"></i>
-            <input type="password" id="authPass" placeholder="••••••••••••" required autocomplete="current-password">
-            <button type="button" class="toggle-password-btn" id="togglePasswordBtn" title="Toggle Password Visibility" aria-label="Toggle Password Visibility">
-              <i class="bi bi-eye-slash-fill"></i>
-            </button>
-          </div>
-        </label>
-
-        <div class="auth-options">
-          <label>
-            <input type="checkbox" id="authRem" checked> Remember session
-          </label>
-          <span style="color:var(--muted);font-size:11px"><i class="bi bi-shield-check"></i> Staff Login</span>
         </div>
 
-        <button type="submit" class="auth-btn">
-          <i class="bi bi-box-arrow-in-right"></i> Sign In to Store Admin
-        </button>
-      </form>
+        <h1 class="auth-banner-title">Bhau Korde Admin Portal</h1>
+        
+        <p class="auth-banner-desc">
+          Secure access to manage orders, catalog inventory, customer inquiries, and authentic Maharashtrian spice recipes for Bhau Korde Masale administrators.
+        </p>
+
+        <div class="auth-banner-tags">
+          <span class="auth-tag"><i class="bi bi-patch-check-fill"></i> Authentic Konkan Spices</span>
+          <span class="auth-tag"><i class="bi bi-shield-lock-fill"></i> Role Protected</span>
+          <span class="auth-tag"><i class="bi bi-geo-alt-fill"></i> Panvel, Navi Mumbai</span>
+        </div>
+      </div>
+
+      <div class="auth-banner-footer">
+        <span>© 2026 Bhau Korde Masale. All rights reserved.</span>
+      </div>
+    </div>
+
+    <!-- Right Column: Clean Modern Sign In -->
+    <div class="auth-form-pane">
+      <div class="auth-form-container">
+        
+        <div class="auth-shield-header">
+          <div class="auth-shield-icon">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <h2 class="auth-title">Welcome Back</h2>
+          <p class="auth-subtitle">Please sign in to your admin account</p>
+        </div>
+
+        <form id="authForm" class="auth-form">
+          <div class="auth-field-group">
+            <label class="auth-field-label" for="authUser">Username</label>
+            <div class="auth-input-wrapper">
+              <i class="bi bi-person auth-icon-left"></i>
+              <input type="text" id="authUser" placeholder="Enter admin username" required autocomplete="username">
+            </div>
+          </div>
+
+          <div class="auth-field-group">
+            <label class="auth-field-label" for="authPass">Password</label>
+            <div class="auth-input-wrapper">
+              <i class="bi bi-lock auth-icon-left"></i>
+              <input type="password" id="authPass" placeholder="Enter password" required autocomplete="current-password">
+              <button type="button" class="auth-toggle-pwd" id="togglePasswordBtn" title="Toggle Password Visibility" aria-label="Toggle Password Visibility">
+                <i class="bi bi-eye-slash-fill"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="auth-options-line">
+            <label class="auth-remember-label">
+              <input type="checkbox" id="authRem" checked>
+              <span>Remember session</span>
+            </label>
+            <span class="auth-status-chip"><i class="bi bi-dot"></i> Staff Access</span>
+          </div>
+
+          <button type="submit" class="auth-submit-btn">
+            Sign In
+          </button>
+        </form>
+
+        <div class="auth-support-footer">
+          <p class="auth-support-query">Need help accessing your account?</p>
+          <p class="auth-support-contact">Contact system administrator at <a href="tel:+918369424099"><b>+91 8369424099</b></a></p>
+        </div>
+
+      </div>
     </div>
   </div>
 
