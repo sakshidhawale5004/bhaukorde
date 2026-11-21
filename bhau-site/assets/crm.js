@@ -31,9 +31,24 @@
     currencySymbol: "₹"
   };
 
-  // Default 30 Products (Configurable Catalog)
+  // Default 31 Products (Configurable Catalog)
   const DEFAULT_PRODUCTS = [
-    // 19 Blended Spices
+    // Blended Spices
+    {
+      id: "malvani-masala",
+      name: "malvani masala",
+      nameMr: "मालवणी मसाला",
+      category: "blend",
+      minPrice: 95,
+      maxPrice: 500,
+      sizes: "50 g · 100 g · 200 g · 500 g",
+      stock: 50,
+      status: "in-stock",
+      bestseller: true,
+      img: "images/Special Malvani Masala.png",
+      slug: "product-malvani-masala.html",
+      desc: "Authentic Konkan Malvani handcrafted spice blend by Bhau Korde Masale for chicken, mutton, and veg curries."
+    },
     {
       id: "chicken-kolhapuri-ready-mix-masala",
       name: "Chicken Kolhapuri Ready Mix Masala",
@@ -599,6 +614,12 @@
       saveData(STORAGE.INQUIRIES, state.inquiries);
     }
 
+    // Ensure default malvani-masala is present if not already added
+    if (Array.isArray(state.products) && !state.products.some(p => p && (p.id === "malvani-masala" || (p.name && p.name.toLowerCase() === "malvani masala")))) {
+      state.products.unshift(DEFAULT_PRODUCTS[0]);
+      saveData(STORAGE.PRODUCTS, state.products);
+    }
+
     // Save initial defaults if missing
     if (!localStorage.getItem(STORAGE.PRODUCTS)) saveData(STORAGE.PRODUCTS, state.products);
     if (!localStorage.getItem(STORAGE.SETTINGS)) saveData(STORAGE.SETTINGS, state.settings);
@@ -612,9 +633,15 @@
     }
   }
 
-  // Sync products back to storefront `CAT` structure so cart and shop modals see the latest configured catalog
+  // Sync products back to storefront `CAT` structure so cart, storefront pages and shop modals see the latest configured catalog
   function syncCatalogToStorefront() {
     saveData(STORAGE.PRODUCTS, state.products);
+    try {
+      window.dispatchEvent(new StorageEvent("storage", {
+        key: STORAGE.PRODUCTS,
+        newValue: JSON.stringify(state.products)
+      }));
+    } catch(e) {}
     toast("Catalog synchronized with website storefront!", "success");
   }
 
@@ -788,13 +815,13 @@
     if (pipeWrap) {
       pipeWrap.innerHTML = `
         <div class="pipeline-pill pending" onclick="window.BK_CRM.filterOrders('pending')">
-          <i class="bi bi-hourglass-split"></i> Pending Consecration (${counts.pending})
+          <i class="bi bi-hourglass-split"></i> New Orders (${counts.pending})
         </div>
         <div class="pipeline-pill processing" onclick="window.BK_CRM.filterOrders('processing')">
-          <i class="bi bi-box-seam"></i> Packed / Processing (${counts.processing})
+          <i class="bi bi-box-seam"></i> In Packing (${counts.processing})
         </div>
         <div class="pipeline-pill shipped" onclick="window.BK_CRM.filterOrders('shipped')">
-          <i class="bi bi-truck"></i> In Transit (${counts.shipped})
+          <i class="bi bi-truck"></i> Dispatched (${counts.shipped})
         </div>
         <div class="pipeline-pill delivered" onclick="window.BK_CRM.filterOrders('delivered')">
           <i class="bi bi-check-all"></i> Delivered (${counts.delivered})
@@ -1011,9 +1038,9 @@
           <td><b>${rs(o.total)}</b><div style="font-size:10.5px;color:var(--muted)">${esc(o.payment)}</div></td>
           <td>
             <select class="filter-select" style="font-size:12px;padding:4px 8px;" onchange="window.BK_CRM.updateOrderStatus('${esc(o.id)}', this.value)">
-              <option value="pending" ${o.status === "pending" ? "selected" : ""}>Pending Consecration</option>
-              <option value="processing" ${o.status === "processing" ? "selected" : ""}>Packed / Processing</option>
-              <option value="shipped" ${o.status === "shipped" ? "selected" : ""}>Shipped / In Transit</option>
+              <option value="pending" ${o.status === "pending" ? "selected" : ""}>New Order</option>
+              <option value="processing" ${o.status === "processing" ? "selected" : ""}>In Packing</option>
+              <option value="shipped" ${o.status === "shipped" ? "selected" : ""}>Dispatched</option>
               <option value="delivered" ${o.status === "delivered" ? "selected" : ""}>Delivered</option>
               <option value="cancelled" ${o.status === "cancelled" ? "selected" : ""}>Cancelled</option>
             </select>
@@ -1038,7 +1065,7 @@
   }
 
   // ==========================================================================
-  // RENDER: PATRON CRM (CUSTOMERS)
+  // RENDER: CUSTOMERS DIRECTORY
   // ==========================================================================
   function renderCustomers() {
     const listWrap = document.getElementById("customersTableBody");
@@ -1063,8 +1090,8 @@
 
     if (!items.length) {
       const msg = state.customers.length === 0
-        ? `<i class="bi bi-people" style="font-size:32px;display:block;margin-bottom:10px;opacity:0.6"></i>No patron profiles recorded yet.<br><small style="font-size:12px;opacity:0.8">Customer details and order histories will automatically appear here as purchases are made.</small>`
-        : `No patrons match your search query.`;
+        ? `<i class="bi bi-people" style="font-size:32px;display:block;margin-bottom:10px;opacity:0.6"></i>No customer records yet.<br><small style="font-size:12px;opacity:0.8">Customer details and order histories will automatically appear here as purchases are made.</small>`
+        : `No customers match your search query.`;
       listWrap.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:44px 20px;color:var(--muted)">${msg}</td></tr>`;
       return;
     }
@@ -1089,15 +1116,15 @@
             <div style="font-size:11px;color:var(--muted)"><i class="bi bi-envelope"></i> ${esc(c.email)}</div>
           </td>
           <td>${esc(c.city)}</td>
-          <td><span class="status-badge ${segClass}">${esc(c.segment || "Patron")}</span></td>
+          <td><span class="status-badge ${segClass}">${esc(c.segment || "Regular Customer")}</span></td>
           <td><b>${c.ordersCount || 1}</b> orders</td>
           <td><b style="color:var(--accent)">${rs(c.lifetimeSpend)}</b></td>
           <td>
             <div class="action-btns">
-              <button class="btn-whatsapp" title="VIP Concierge WhatsApp" onclick="window.BK_CRM.sendCustomerConciergeWhatsApp('${esc(c.phone)}', '${esc(c.name)}')">
-                <i class="bi bi-whatsapp"></i> Concierge
+              <button class="btn-whatsapp" title="WhatsApp Customer" onclick="window.BK_CRM.sendCustomerWhatsApp('${esc(c.phone)}', '${esc(c.name)}')">
+                <i class="bi bi-whatsapp"></i> Chat
               </button>
-              <button class="action-icon-btn" title="Edit Patron Notes" onclick="window.BK_CRM.editCustomerNotes('${esc(c.id)}')">
+              <button class="action-icon-btn" title="Customer Notes" onclick="window.BK_CRM.editCustomerNotes('${esc(c.id)}')">
                 <i class="bi bi-card-text"></i>
               </button>
             </div>
@@ -1517,26 +1544,27 @@
   }
 
   // ==========================================================================
-  // PATRON CRM ACTIONS
+  // CUSTOMER ACTIONS
   // ==========================================================================
-  function sendCustomerConciergeWhatsApp(phone, name) {
+  function sendCustomerWhatsApp(phone, name) {
     const cleanPhone = phone.replace(/[^0-9]/g, "");
     const formatted = cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone;
-    const msg = `Namaste ${name}! 🌿\n\nGreetings from *Bhau Korde Masale* (Panvel).\n\nAs one of our cherished patrons, we wanted to share our fresh seasonal batches of Malvani, Kolhapuri, and homemade Aamba & Limbu Lonche.\n\nLet us know if you would like your favorite spice blends prepared and dispatched directly to your doorstep!\n\n_चवीने खाणार त्याला भाऊ देणार._`;
+    const msg = `Namaste ${name} ji, greetings from Bhau Korde Masale (Panvel)! We have fresh batches of our handmade spice blends and pickles ready. Please let us know if you would like to place an order or need anything dispatched. - Bhau Korde Masale, Panvel.`;
 
     window.open(`https://wa.me/${formatted}?text=${encodeURIComponent(msg)}`, "_blank");
   }
+  const sendCustomerConciergeWhatsApp = sendCustomerWhatsApp;
 
   function editCustomerNotes(customerId) {
     const c = state.customers.find((x) => x.id === customerId);
     if (!c) return;
 
-    const newNotes = prompt(`Enter CRM Staff Notes for ${c.name}:`, c.notes || "");
+    const newNotes = prompt(`Enter notes for ${c.name}:`, c.notes || "");
     if (newNotes !== null) {
       c.notes = newNotes;
       saveData(STORAGE.CUSTOMERS, state.customers);
       renderCustomers();
-      toast("Patron CRM notes saved.");
+      toast("Customer notes saved.");
     }
   }
 
@@ -1626,11 +1654,11 @@
   }
 
   function exportCustomersCSV() {
-    const rows = [["Patron ID", "Full Name", "Phone", "Email", "City", "CRM Segment", "Total Orders", "Lifetime Spend (INR)", "Notes"]];
+    const rows = [["Customer ID", "Customer Name", "Phone", "Email", "City", "Customer Type", "Total Orders", "Total Purchases (INR)", "Notes"]];
     state.customers.forEach((c) => {
       rows.push([c.id, c.name, c.phone, c.email, c.city, c.segment, c.ordersCount, c.lifetimeSpend, c.notes || ""]);
     });
-    downloadCSV("bhau_korde_patrons_crm.csv", rows);
+    downloadCSV("bhau_korde_customers.csv", rows);
   }
 
   function exportInquiriesCSV() {
@@ -1638,7 +1666,7 @@
     state.inquiries.forEach((i) => {
       rows.push([i.id, i.date, i.name, i.phone, i.email, i.type, i.status, i.message]);
     });
-    downloadCSV("bhau_korde_inquiries_leads.csv", rows);
+    downloadCSV("bhau_korde_inquiries.csv", rows);
   }
 
   // ==========================================================================
@@ -1658,9 +1686,9 @@
     const blob = new Blob([JSON.stringify(fullBackup, null, 2)], { type: "application/json" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `bhau_korde_crm_backup_${Date.now()}.json`;
+    link.download = `bhau_korde_backup_${Date.now()}.json`;
     link.click();
-    toast("Full CRM database backup downloaded!");
+    toast("Store backup downloaded successfully.");
   }
 
   function importBackupJSON(file) {
@@ -1908,6 +1936,7 @@
       state.filters.orderStatus = st;
       renderOrders();
     },
+    sendCustomerWhatsApp,
     sendCustomerConciergeWhatsApp,
     editCustomerNotes,
     updateInquiryStatus,

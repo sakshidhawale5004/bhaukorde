@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>BHAU KORDE MASALE · Staff CRM & Commerce Admin Hub</title>
-  <meta name="description" content="Internal CRM and commerce administration hub for Bhau Korde Masale: product catalog configuration, patron CRM, order pipeline, inquiries, and analytics.">
+  <title>Bhau Korde Masale · Store Admin Panel</title>
+  <meta name="description" content="Administration panel for Bhau Korde Masale: product catalog, orders, customers, inquiries, and store settings.">
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="../LOGO-English.png" type="image/png">
 
@@ -27,21 +27,21 @@
       <div class="auth-header">
         <img src="../LOGO-English.png" alt="Bhau Korde Masale" class="auth-logo-img">
         <h1>Bhau Korde Masale</h1>
-        <p>Staff CRM & Commerce Administration Hub</p>
-        <span class="auth-badge">Panvel Operations Center</span>
+        <p>Store & Order Administration</p>
+        <span class="auth-badge">Panvel, Navi Mumbai</span>
       </div>
 
       <form id="authForm" class="auth-form">
         <label>
-          Staff Username
+          Username
           <div class="input-box">
             <i class="bi bi-person input-icon-left"></i>
-            <input type="text" id="authUser" placeholder="Enter staff username" required autocomplete="username">
+            <input type="text" id="authUser" placeholder="Enter username" required autocomplete="username">
           </div>
         </label>
 
         <label>
-          Access Password
+          Password
           <div class="input-box">
             <i class="bi bi-key input-icon-left"></i>
             <input type="password" id="authPass" placeholder="••••••••••••" required autocomplete="current-password">
@@ -55,11 +55,11 @@
           <label>
             <input type="checkbox" id="authRem" checked> Remember session
           </label>
-          <span style="color:var(--gold);font-size:11px"><i class="bi bi-shield-check"></i> AES Secured</span>
+          <span style="color:var(--muted);font-size:11px"><i class="bi bi-shield-check"></i> Staff Login</span>
         </div>
 
         <button type="submit" class="auth-btn">
-          <i class="bi bi-box-arrow-in-right"></i> Sign In to Staff Console
+          <i class="bi bi-box-arrow-in-right"></i> Sign In to Store Admin
         </button>
       </form>
     </div>
@@ -80,7 +80,7 @@
           <div class="crm-brand-info">
             <div class="crm-brand-title">BHAU KORDE MASALE</div>
             <div class="crm-brand-sub">
-              <span class="live-pulse"></span> Commerce & Staff CRM
+              <span class="live-pulse"></span> Store Admin Panel
             </div>
           </div>
         </div>
@@ -91,13 +91,13 @@
             <i class="bi bi-speedometer2"></i> Dashboard
           </button>
           <button type="button" class="tab-btn" data-crm-tab="products">
-            <i class="bi bi-box-seam"></i> Products (<span id="navCountProducts">30</span>)
+            <i class="bi bi-box-seam"></i> Products (<span id="navCountProducts">31</span>)
           </button>
           <button type="button" class="tab-btn" data-crm-tab="orders">
             <i class="bi bi-bag-check"></i> Orders (<span id="navCountOrders">0</span>)
           </button>
           <button type="button" class="tab-btn" data-crm-tab="customers">
-            <i class="bi bi-people"></i> Patron CRM (<span id="navCountCustomers">0</span>)
+            <i class="bi bi-people"></i> Customers (<span id="navCountCustomers">0</span>)
           </button>
           <button type="button" class="tab-btn" data-crm-tab="inquiries">
             <i class="bi bi-chat-left-dots"></i> Inquiries (<span id="navCountInquiries">0</span>)
@@ -121,7 +121,7 @@
             <div class="staff-avatar">A</div>
             <div class="staff-meta">
               <span class="staff-name">Staff Admin</span>
-              <span class="staff-role">Panvel Center</span>
+              <span class="staff-role">Panvel</span>
             </div>
           </div>
 
@@ -165,35 +165,35 @@
               <span class="kpi-trend neutral">100% Configured</span>
             </div>
             <div class="kpi-label">Product Catalog</div>
-            <div class="kpi-value" id="kpiProducts">30</div>
+            <div class="kpi-value" id="kpiProducts">31</div>
             <div class="kpi-sub">Blended, Powders & Lonche</div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-top">
               <div class="kpi-icon-wrap cust"><i class="bi bi-people-fill"></i></div>
-              <span class="kpi-trend up">Active CRM</span>
+              <span class="kpi-trend neutral">Directory</span>
             </div>
-            <div class="kpi-label">Registered Patrons</div>
+            <div class="kpi-label">Total Customers</div>
             <div class="kpi-value" id="kpiCustomers">0</div>
-            <div class="kpi-sub">VIP & repeat spice lovers</div>
+            <div class="kpi-sub">Store & WhatsApp buyers</div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-top">
               <div class="kpi-icon-wrap inq"><i class="bi bi-chat-quote-fill"></i></div>
-              <span class="kpi-trend neutral">Lead Hub</span>
+              <span class="kpi-trend neutral">Messages</span>
             </div>
-            <div class="kpi-label">Inquiries & Leads</div>
+            <div class="kpi-label">Customer Inquiries</div>
             <div class="kpi-value" id="kpiInquiries">0</div>
-            <div class="kpi-sub">Distributors & bulk queries</div>
+            <div class="kpi-sub">Contact & wholesale queries</div>
           </div>
         </div>
 
         <div class="pipeline-bar">
           <div class="pipeline-title">
             <i class="bi bi-diagram-3-fill" style="color:var(--accent)"></i>
-            <span>Order Fulfillment Pipeline:</span>
+            <span>Order Status Pipeline:</span>
           </div>
           <div class="pipeline-items" id="pipelineStats"></div>
         </div>
@@ -228,16 +228,16 @@
           <div class="panel-box">
             <div class="panel-header">
               <div class="panel-title">
-                <i class="bi bi-pie-chart-fill" style="color:var(--gold)"></i> Catalog Proportions
+                <i class="bi bi-pie-chart-fill" style="color:var(--gold)"></i> Category Breakdown
               </div>
-              <span style="font-size:12px;color:var(--muted)">30 Total Items</span>
+              <span style="font-size:12px;color:var(--muted)">31 Products</span>
             </div>
             <div class="panel-body">
               <div id="overviewCategoryDistribution"></div>
 
               <div style="margin-top:24px;padding:14px;background:var(--surface-alt);border-radius:var(--radius-md);border:1px solid var(--line);">
                 <div style="font-size:12px;font-weight:600;color:var(--fg);margin-bottom:4px">
-                  <i class="bi bi-geo-alt-fill" style="color:var(--accent)"></i> Panvel Hub Details
+                  <i class="bi bi-geo-alt-fill" style="color:var(--accent)"></i> Shop & Office Address
                 </div>
                 <div style="font-size:11.5px;color:var(--muted);line-height:1.5">
                   Bhau Korde Masale<br>
@@ -321,9 +321,9 @@
 
             <select id="filterOrderStatus" class="filter-select">
               <option value="all">All Order Statuses</option>
-              <option value="pending">Pending Consecration</option>
-              <option value="processing">Packed / Processing</option>
-              <option value="shipped">Shipped / In Transit</option>
+              <option value="pending">New Orders</option>
+              <option value="processing">In Packing</option>
+              <option value="shipped">Dispatched</option>
               <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
             </select>
@@ -344,7 +344,7 @@
                 <th>Customer Contact</th>
                 <th>Items & Pack Sizes</th>
                 <th>Amount (₹) & Payment</th>
-                <th>Fulfillment Status</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -353,26 +353,26 @@
         </div>
       </section>
 
-      <!-- VIEW 4: PATRON CRM (CUSTOMERS) -->
+      <!-- VIEW 4: CUSTOMERS DIRECTORY -->
       <section id="view-customers" class="crm-view">
         <div class="table-toolbar">
           <div class="toolbar-left">
             <div class="search-box">
               <i class="bi bi-search"></i>
-              <input type="text" id="searchCustomersInput" placeholder="Search patrons by name, phone, city, or segment...">
+              <input type="text" id="searchCustomersInput" placeholder="Search customers by name, phone, or city...">
             </div>
 
             <select id="filterCustomerSegment" class="filter-select">
-              <option value="all">All Patron Segments</option>
-              <option value="VIP Patron">VIP Patrons</option>
-              <option value="Loyal Buyer">Loyal Buyers</option>
+              <option value="all">All Customers</option>
+              <option value="Repeat Buyer">Repeat Customers</option>
+              <option value="Wholesale Buyer">Wholesale / Hotel Buyers</option>
               <option value="New Customer">New Customers</option>
             </select>
           </div>
 
           <div class="toolbar-right">
             <button type="button" class="btn-outline" onclick="window.BK_CRM.exportCustomersCSV()">
-              <i class="bi bi-download"></i> Export Patrons CSV
+              <i class="bi bi-download"></i> Export Customers CSV
             </button>
           </div>
         </div>
@@ -381,12 +381,12 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th>Patron Profile</th>
-                <th>Contact Details</th>
-                <th>Location</th>
-                <th>CRM Segment</th>
-                <th>Order Volume</th>
-                <th>Lifetime Spend</th>
+                <th>Customer</th>
+                <th>Contact</th>
+                <th>City</th>
+                <th>Category</th>
+                <th>Orders</th>
+                <th>Total Purchases</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -508,26 +508,26 @@
         <div class="panel-box" style="max-width:960px;margin:0 auto;">
           <div class="panel-header">
             <div class="panel-title">
-              <i class="bi bi-database-check" style="color:var(--gold)"></i> Data Backup, Restore & Reset Operations
+              <i class="bi bi-database-check" style="color:var(--gold)"></i> Store Data Backup & Reset
             </div>
           </div>
           <div class="panel-body">
             <p style="color:var(--muted);font-size:12.5px;margin-bottom:18px">
-              Export your entire CRM database as an encrypted JSON backup file, or restore from a previous snapshot.
+              Download a complete backup of your products, orders, and inquiries as a JSON file, or restore your store data from a previous file.
             </p>
 
             <div style="display:flex;gap:12px;flex-wrap:wrap">
               <button type="button" class="btn-outline" onclick="window.BK_CRM.exportFullBackupJSON()">
-                <i class="bi bi-cloud-arrow-down-fill"></i> Download Full JSON Backup
+                <i class="bi bi-cloud-arrow-down-fill"></i> Download Store Backup (JSON)
               </button>
 
               <label class="btn-outline" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">
-                <i class="bi bi-cloud-arrow-up-fill"></i> Restore from JSON
+                <i class="bi bi-cloud-arrow-up-fill"></i> Restore Backup File
                 <input type="file" id="importBackupFile" accept=".json" style="display:none">
               </label>
 
               <button type="button" class="btn-outline" style="color:var(--danger);border-color:var(--danger-border)" onclick="window.BK_CRM.resetToDefaultCatalog()">
-                <i class="bi bi-arrow-counterclockwise"></i> Reset 30 Products to Factory Defaults
+                <i class="bi bi-arrow-counterclockwise"></i> Reset to Original Products
               </button>
             </div>
           </div>
@@ -634,20 +634,20 @@
             <img id="modalImgPreview" src="../images/Chiken Lollypop Ready Mix.png" alt="Preview">
           </div>
           <div style="font-size:12px;color:var(--muted)">
-            <b>Real Image Preview</b><br>
-            Synced from uploaded device file or <code>images/</code>.
+            <b>Image Preview</b><br>
+            Preview of selected product photo.
           </div>
         </div>
 
         <div class="form-group">
-          <label>Description & Handcrafted Details</label>
+          <label>Product Description</label>
           <textarea id="prodFormDesc" rows="3" placeholder="Handcrafted by Bhau Korde Masale from handpicked natural spices..."></textarea>
         </div>
 
         <div style="display:flex;align-items:center;gap:8px">
           <input type="checkbox" id="prodFormBestseller">
           <label for="prodFormBestseller" style="font-size:13px;font-weight:600;cursor:pointer">
-            ★ Mark as Bestseller / Featured Spice Blend
+            ★ Mark as Bestseller
           </label>
         </div>
       </div>
@@ -655,7 +655,7 @@
       <div class="modal-footer">
         <button type="button" class="btn-outline" data-close-modal>Cancel</button>
         <button type="button" id="btnSaveProduct" class="btn-primary">
-          <i class="bi bi-check-lg"></i> Save Configuration
+          <i class="bi bi-check-lg"></i> Save Product
         </button>
       </div>
     </div>

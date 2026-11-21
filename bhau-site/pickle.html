@@ -504,14 +504,64 @@ nav.main a.top.cur{color:var(--accent);border-bottom:2px solid var(--accent)}
 
 <script>
 var U="",WA="919167834686",SITE="product-";
-var P=[["Aamba Goad Lonche", 75, 130, "200 g · 500 g", "images/Aamba%20Goad%20Lonche.png", null, "aamba-god-lonche", 1], ["Aamba Lonche", 75, 240, "", "images/Aamba%20Lonche.png", null, "aamba-lonche", 1], ["Limbu Goad Lonche", 75, 130, "200 g · 500 g", "images/Limbu%20Goad%20Lonche.png", null, "limbi-god-lonche", 1], ["Limbu Lonche", 75, 240, "", "images/Limbu%20Lonche.png", null, "limbu-lonche", 1], ["Mirchi Lonche", 75, 130, "200 g · 500 g", "images/Mirchi%20Lonche.png", null, "mirchi-lonche", 1], ["Mix Lonche", 75, 240, "", "images/Mix%20Lonche.png", null, "mix-lonche", 1]];
+var P=[
+  ["Aamba Goad Lonche", 75, 130, "200 g · 500 g", "images/Aamba%20Goad%20Lonche.png", null, "aamba-god-lonche", 1],
+  ["Aamba Lonche", 75, 240, "", "images/Aamba%20Lonche.png", null, "aamba-lonche", 1],
+  ["Limbu Goad Lonche", 75, 130, "200 g · 500 g", "images/Limbu%20Goad%20Lonche.png", null, "limbi-god-lonche", 1],
+  ["Limbu Lonche", 75, 240, "", "images/Limbu%20Lonche.png", null, "limbu-lonche", 1],
+  ["Mirchi Lonche", 75, 130, "200 g · 500 g", "images/Mirchi%20Lonche.png", null, "mirchi-lonche", 1],
+  ["Mix Lonche", 75, 240, "", "images/Mix%20Lonche.png", null, "mix-lonche", 1]
+];
+
+// Dynamic CRM Catalog Synchronizer
+function syncFromCRM() {
+  try {
+    var raw = localStorage.getItem("bk_crm_products");
+    if (!raw) return;
+    var prods = JSON.parse(raw);
+    if (!Array.isArray(prods) || prods.length === 0) return;
+    var pickles = prods.filter(function(x) {
+      return (x.category || "pickle") === "pickle";
+    });
+    if (pickles.length > 0) {
+      P = pickles.map(function(item) {
+        var minP = Number(item.minPrice || item.price || 0);
+        var maxP = Number(item.maxPrice || item.minPrice || item.price || 0);
+        var slug = item.slug || item.id || (item.name ? item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "prod");
+        slug = slug.replace(/^product-/, '').replace(/\.html$/, '');
+        var imgPath = item.img || "images/Mix Lonche.png";
+        return [
+          item.name,
+          minP,
+          maxP,
+          item.sizes || "",
+          imgPath,
+          null,
+          slug,
+          item.bestseller ? 1 : 0
+        ];
+      });
+    }
+  } catch(e) {
+    console.warn("CRM product sync fallback:", e);
+  }
+}
+syncFromCRM();
+
+window.addEventListener("storage", function(e) {
+  if (e.key === "bk_crm_products") {
+    syncFromCRM();
+    view();
+  }
+});
+
 function $(s){return document.querySelector(s)}
 var NOIMG='<div class="noimg"><i class="bi bi-image"></i>Image coming soon</div>';
 function imgFail(i){var f=(i.dataset.fb||"").split("|").filter(Boolean);if(f.length){i.dataset.fb=f.slice(1).join("|");i.src=U+f[0]}else{i.parentNode.innerHTML=NOIMG}}
 function rs(n){return "\u20B9"+n}
 function price(p){return p[1]===p[2]?rs(p[1]):rs(p[1])+" \u2013 "+rs(p[2])}
 function esc(s){return s.replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function opts(p){var s=p[3]?p[3].split(/\s*\u00b7\s*/):[];
+function opts(p){var s=p[3]?p[3].split(/\s*[\u00b7,]\s*/):[];
   if(s.length>1){var g=parseFloat(s[0]);return s.map(function(z,i){return {size:z,price:i===0?p[1]:i===s.length-1?p[2]:Math.round(p[1]*parseFloat(z)/g)}})}
   if(s.length===1)return [{size:s[0],price:p[1]}];
   return [{size:p[1]===p[2]?"":"Smallest pack",price:p[1]}]}
@@ -519,9 +569,10 @@ function sel(p,i){var o=opts(p);return o.length>1?'<select class="szsel" aria-la
 function card(p){
   var img=p[4]?'<img src="'+U+p[4]+'" data-fb="'+(p[5]||"")+'" alt="'+esc(p[0])+'" loading="lazy" onerror="imgFail(this)">':NOIMG;
   var msg=encodeURIComponent("Hello Bhau Korde, I would like to order: "+p[0]);
+  var page = (p[6] && p[6].indexOf(".html") > -1) ? p[6] : (SITE + p[6] + ".html");
   return '<article class="pc">'+(p[7]?'<span class="badge">Sale</span>':'')
-   +'<a class="pi" href="'+SITE+p[6]+'.html" aria-label="'+esc(p[0])+'">'+img+'</a>'
-   +'<div class="pb"><h3><a href="'+SITE+p[6]+'.html">'+esc(p[0])+'</a></h3>'
+   +'<a class="pi" href="'+page+'" aria-label="'+esc(p[0])+'">'+img+'</a>'
+   +'<div class="pb"><h3><a href="'+page+'">'+esc(p[0])+'</a></h3>'
    +'<div class="pp">'+price(p)+'</div><div class="sz">'+(p[3]?esc(p[3]):"")+'</div>'+sel(p)+'<button class="btn addc" data-add="'+P.indexOf(p)+'"><i class="bi bi-cart-plus"></i>Add to cart</button>'
    +'<a class="btn" href="https://wa.me/'+WA+'?text='+msg+'" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i>Order</a></div></article>'}
 function view(){
