@@ -970,7 +970,7 @@
               <button class="action-icon-btn" title="Edit Product Configuration" onclick="window.BK_CRM.openEditProductModal('${esc(p.id)}')">
                 <i class="bi bi-pencil-square"></i>
               </button>
-              <a class="action-icon-btn" title="Preview on Website" href="${esc(p.slug || 'product-darbari-sunday-mix-masala.html')}" target="_blank">
+              <a class="action-icon-btn" title="Preview on Website" href="${(window.location.pathname.indexOf('/admin/') > -1 ? '../' : '') + ((p.slug && p.slug.endsWith('.html') && p.slug.indexOf('blended-') === -1) ? p.slug : ('product.html?id=' + encodeURIComponent(p.id)))}" target="_blank">
                 <i class="bi bi-box-arrow-up-right"></i>
               </a>
               <button class="action-icon-btn delete" title="Delete Product" onclick="window.BK_CRM.deleteProduct('${esc(p.id)}')">
@@ -1819,7 +1819,7 @@
         status,
         bestseller,
         img,
-        slug: "blended-spices.html",
+        slug: "product.html?id=" + encodeURIComponent(id || "product-" + Date.now()),
         desc
       };
       state.products.push(newProduct);

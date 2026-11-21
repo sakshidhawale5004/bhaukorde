@@ -583,7 +583,23 @@ function sel(p,i){var o=opts(p);return o.length>1?'<select class="szsel" aria-la
 function card(p){
   var img=p[4]?'<img src="'+U+p[4]+'" data-fb="'+(p[5]||"")+'" alt="'+esc(p[0])+'" loading="lazy" onerror="imgFail(this)">':NOIMG;
   var msg=encodeURIComponent("Hello Bhau Korde, I would like to order: "+p[0]);
-  var page = (p[6] && p[6].indexOf(".html") > -1) ? p[6] : (SITE + p[6] + ".html");
+  var staticList = [
+    "product-aamba-god-lonche.html", "product-aamba-lonche.html", "product-chicken-kolhapuri-ready-mix-masala.html",
+    "product-chiken-lolopop-ready-mix.html", "product-chole-masala.html", "product-darbari-sunday-mix-masala.html",
+    "product-fikka-masala.html", "product-jeera-powder.html", "product-limbi-god-lonche.html",
+    "product-limbu-lonche.html", "product-malvani.html", "product-malvani-masala.html", "product-mirchi-lonche.html",
+    "product-misal-pav-masala.html", "product-mix-lonche.html", "product-moglaei-matan-masala.html",
+    "product-pavbhaji-masala.html", "product-pulao-masala.html", "product-rajshahi-biryani-masala.html",
+    "product-ready-mango-pickle-masala.html", "product-sagar-ratn-fish-masala.html", "product-sambar-masala.html",
+    "product-special-bramhni-kala-god-masala.html", "product-special-kashmiri-chili-powder.html",
+    "product-special-koli-aagri-masala.html", "product-special-malvani-masala.html",
+    "product-special-rajdrbari-garam-masala-2.html", "product-special-suruchi-mirchi-powder.html",
+    "product-sudha-dhane-powder.html", "product-super-sunday-bhajlela-mix-masala.html",
+    "product-suvrna-shudha-halad-powder.html", "product-tandoori-masala.html"
+  ];
+  var rawSlug = p[6] || "";
+  var candidate = (rawSlug.indexOf(".html") > -1) ? rawSlug : ("product-" + rawSlug + ".html");
+  var page = (staticList.indexOf(candidate) > -1) ? candidate : ("product.html?id=" + encodeURIComponent(rawSlug));
   return '<article class="pc">'+(p[7]?'<span class="badge">Sale</span>':'')
    +'<a class="pi" href="'+page+'" aria-label="'+esc(p[0])+'">'+img+'</a>'
    +'<div class="pb"><h3><a href="'+page+'">'+esc(p[0])+'</a></h3>'
