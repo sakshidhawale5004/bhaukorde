@@ -533,6 +533,7 @@
     },
     activeModal: null,
     editingProduct: null,
+    userCustomizedMarathi: false,
     viewingOrder: null
   };
 
@@ -1236,6 +1237,447 @@
   }
 
   // ==========================================================================
+  // MARATHI TRANSLITERATION ENGINE (Offline Phonetic + Dictionary)
+  // ==========================================================================
+  const MARATHI_DICTIONARY = {
+    // Brand & Regions
+    "bhau": "भाऊ",
+    "korde": "कोर्डे",
+    "panvel": "पनवेल",
+    "navi": "नवी",
+    "mumbai": "मुंबई",
+    "maharashtra": "महाराष्ट्र",
+    "konkan": "कोकण",
+    "alibaug": "अलिबाग",
+    "ratnagiri": "रत्नागिरी",
+    "malvan": "मालवण",
+    "malvani": "मालवणी",
+    "malwani": "मालवणी",
+    "kolhapur": "कोल्हापूर",
+    "kolhapuri": "कोल्हापुरी",
+    "nagpur": "नागपूर",
+    "nagpuri": "नागपुरी",
+    "pune": "पुणे",
+    "puneri": "पुणेरी",
+    "solapur": "सोलापूर",
+    "nashik": "नाशिक",
+    "khandesh": "खान्देश",
+    "khandeshi": "खान्देशी",
+    "vidarbha": "विदर्भ",
+    "marathwada": "मराठवाडा",
+    "saoji": "सावजी",
+    "agri": "आगरी",
+    "aagri": "आगरी",
+    "koli": "कोळी",
+
+    // Spice & Product Nomenclature
+    "masala": "मसाला",
+    "masale": "मसाले",
+    "special": "स्पेशल",
+    "spcl": "स्पेशल",
+    "mix": "मिक्स",
+    "mixed": "मिक्स",
+    "ready": "रेडी",
+    "powder": "पावडर",
+    "powders": "पावडर",
+    "pud": "पूड",
+    "pure": "शुद्ध",
+    "shuddha": "शुद्ध",
+    "shudha": "शुद्ध",
+    "sudha": "शुद्ध",
+    "natural": "नॅचरल",
+    "organic": "ऑरगॅनिक",
+    "fresh": "ताजे",
+    "premium": "प्रीमियम",
+    "best": "बेस्ट",
+    "bestseller": "बेस्टसेलर",
+    "authentic": "अस्सल",
+    "original": "ओरिजिनल",
+    "traditional": "पारंपारिक",
+    "homemade": "घरगुती",
+    "gharguti": "घरगुती",
+    "desi": "देशी",
+    "gavran": "गावरान",
+    "gavti": "गावठी",
+
+    // Dishes & Specialties
+    "chicken": "चिकन",
+    "chiken": "चिकन",
+    "mutton": "मटण",
+    "matan": "मटण",
+    "fish": "फिश",
+    "machhi": "मासोळी",
+    "masoli": "मासोळी",
+    "egg": "अंडे",
+    "anda": "अंडा",
+    "curry": "कढी",
+    "gravy": "रस्सा",
+    "rassa": "रस्सा",
+    "sukka": "सुक्का",
+    "sukha": "सुका",
+    "fry": "फ्राय",
+    "tandoori": "तंदुरी",
+    "tanduri": "तंदुरी",
+    "kabab": "कबाब",
+    "kebab": "कबाब",
+    "tikka": "टिक्का",
+    "lollipop": "लॉलीपॉप",
+    "lollypop": "लॉलीपॉप",
+    "lolopop": "लॉलीपॉप",
+    "biryani": "बिर्याणी",
+    "pulao": "पुलाव",
+    "pulav": "पुलाव",
+    "rice": "राईस",
+    "bhat": "भात",
+    "kitchen": "किचन",
+    "king": "किंग",
+    "shahi": "शाही",
+    "royal": "रॉयल",
+    "paneer": "पनीर",
+    "panir": "पनीर",
+    "chole": "छोले",
+    "chana": "चना",
+    "rajma": "राजमा",
+    "dal": "डाळ",
+    "daal": "डाळ",
+    "tadka": "तडका",
+    "sambhar": "सांबार",
+    "sambar": "सांबार",
+    "rasam": "रसम",
+    "pav": "पाव",
+    "bhaji": "भाजी",
+    "misal": "मिसळ",
+    "bhadang": "भडंग",
+    "chaat": "चाट",
+    "chat": "चाट",
+    "panipuri": "पाणीपुरी",
+    "vada": "वडा",
+    "vadapav": "वडापाव",
+    "bhelpuri": "भेळपुरी",
+    "bhel": "भेळ",
+    "shev": "शेव",
+    "sev": "शेव",
+    "farsan": "फरसाण",
+    "chivda": "चिवडा",
+
+    // Traditional Masala Names
+    "garam": "गरम",
+    "goda": "गोडा",
+    "god": "गोड",
+    "kala": "काळा",
+    "kaala": "काळा",
+    "brahmani": "ब्राह्मणी",
+    "bramhni": "ब्राह्मणी",
+    "brahmi": "ब्राह्मी",
+    "fikka": "फिक्का",
+    "fika": "फिक्का",
+    "sagar": "सागर",
+    "ratna": "रत्न",
+    "sagarratna": "सागररत्न",
+    "sunday": "संडे",
+    "darbari": "दरबारी",
+    "super": "सुपर",
+    "moghlai": "मोगलाई",
+    "mughlai": "मोगलाई",
+    "kashmiri": "काश्मिरी",
+    "reshampatti": "रेशमपट्टी",
+    "bedgi": "बेडगी",
+    "byadgi": "ब्याडगी",
+    "sankeshwari": "संकेश्वरी",
+    "lavangi": "लवंगी",
+    "ghoti": "घोटी",
+    "boriya": "बोरिया",
+    "suruchi": "सुरुची",
+    "suvarna": "सुवर्ण",
+
+    // Raw Ingredients
+    "halad": "हळद",
+    "haldi": "हळद",
+    "turmeric": "हळद",
+    "mirchi": "मिरची",
+    "chilli": "मिरची",
+    "chili": "मिरची",
+    "red": "लाल",
+    "lal": "लाल",
+    "green": "हिरवी",
+    "hirvi": "हिरवी",
+    "black": "काळी",
+    "kali": "काळी",
+    "white": "पांढरी",
+    "pandhari": "पांढरी",
+    "jeera": "जिरे",
+    "jira": "जिरे",
+    "zeera": "जिरे",
+    "cumin": "जिरे",
+    "dhane": "धने",
+    "dhana": "धने",
+    "dhania": "धने",
+    "coriander": "धने",
+    "hing": "हिंग",
+    "asafetida": "हिंग",
+    "asafoetida": "हिंग",
+    "rai": "मोहरी",
+    "mohari": "मोहरी",
+    "mustard": "मोहरी",
+    "methi": "मेथी",
+    "fenugreek": "मेथी",
+    "kasuri": "कसुरी",
+    "kanda": "कांदा",
+    "onion": "कांदा",
+    "lasun": "लसूण",
+    "lasan": "लसूण",
+    "garlic": "लसूण",
+    "aale": "आले",
+    "ginger": "आले",
+    "adrak": "आले",
+    "saunf": "बडीशेप",
+    "badishep": "बडीशेप",
+    "fennel": "बडीशेप",
+    "elaichi": "वेलची",
+    "velchi": "वेलची",
+    "cardamom": "वेलची",
+    "lavang": "लवंग",
+    "clove": "लवंग",
+    "dalchini": "दालचिनी",
+    "cinnamon": "दालचिनी",
+    "tamalpatra": "तमालपत्र",
+    "tejpatta": "तमालपत्र",
+    "bayleaf": "तमालपत्र",
+    "chakraphool": "चक्रफूल",
+    "jaiphal": "जयफळ",
+    "nutmeg": "जयफळ",
+    "javitri": "जावित्री",
+    "mace": "जावित्री",
+    "kalimirch": "काळी मिरी",
+    "miri": "मिरी",
+    "pepper": "मिरी",
+    "blackpepper": "काळी मिरी",
+    "dagadphool": "दगडफूल",
+    "shahjeera": "शहाजिरे",
+    "triphala": "त्रिफळा",
+    "nagkesar": "नागकेशर",
+    "til": "तीळ",
+    "sesame": "तीळ",
+    "khuskhus": "खसखस",
+    "poppy": "खसखस",
+    "ajwain": "ओवा",
+    "ova": "ओवा",
+    "kesar": "केसर",
+    "saffron": "केसर",
+
+    // Lonche / Pickles
+    "lonche": "लोणचे",
+    "loncha": "लोणचे",
+    "pickle": "लोणचे",
+    "aamba": "आंबा",
+    "amba": "आंबा",
+    "mango": "आंबा",
+    "limbu": "लिंबू",
+    "limbi": "लिंबू",
+    "lemon": "लिंबू",
+    "sweet": "गोड",
+    "spicy": "तिखट",
+    "tikhat": "तिखट",
+    "thecha": "ठेचा",
+    "kharda": "खरडा",
+    "chutney": "चटणी",
+    "chatni": "चटणी",
+    "sauce": "सॉस",
+    "paste": "पेस्ट",
+    "kokum": "कोकम",
+    "amsul": "आमसुला",
+    "chinch": "चिंच",
+    "tamarind": "चिंच",
+    "aamchur": "आमचूर",
+    "amchur": "आमचूर",
+
+    // Staple Foods
+    "batata": "बटाटा",
+    "aloo": "बटाटा",
+    "poha": "पोहे",
+    "sabudana": "साबुदाणा",
+    "besan": "बेसन",
+    "rawa": "रवा",
+    "sooji": "रवा",
+    "atta": "आटा",
+    "flour": "पीठ",
+    "pith": "पीठ",
+    "peeth": "पीठ",
+    "maida": "मैदा",
+    "gul": "गूळ",
+    "gud": "गूळ",
+    "jaggery": "गूळ",
+    "sakhar": "साखर",
+    "sugar": "साखर",
+    "meeth": "मीठ",
+    "mith": "मीठ",
+    "salt": "मीठ",
+    "sendha": "सेंधव",
+    "namak": "मीठ",
+    "oil": "तेल",
+    "tel": "तेल",
+    "ghee": "तूप",
+    "toop": "तूप",
+    "tup": "तूप",
+    "pureghee": "शुद्ध तूप",
+    "tea": "चहा",
+    "chai": "चहा",
+    "coffee": "कॉफी",
+    "milk": "दूध",
+    "doodh": "दूध",
+    "dudh": "दूध",
+    "curd": "दही",
+    "dahi": "दही",
+    "taak": "ताक",
+
+    // Dry Fruits
+    "kaju": "काजू",
+    "cashew": "काजू",
+    "badam": "बदाम",
+    "almond": "बदाम",
+    "pista": "पिस्ता",
+    "kishmish": "मनुका",
+    "raisin": "मनुका",
+    "manuka": "मनुका",
+    "akhrot": "अक्रोड",
+    "walnut": "अक्रोड",
+    "charoli": "चारोळी",
+
+    // Units & Form Factors
+    "pack": "पॅक",
+    "packet": "पॅकेट",
+    "box": "बॉक्स",
+    "bottle": "बाटली",
+    "jar": "जार",
+    "kg": "किलो",
+    "gm": "ग्रॅम",
+    "g": "ग्रॅम",
+    "ml": "मिली",
+    "ltr": "लिटर",
+    "and": "आणि",
+    "with": "सहित"
+  };
+
+  const VOWEL_STANDALONE = {
+    "aa": "आ", "a": "अ", "ai": "ऐ", "au": "औ",
+    "ee": "ई", "e": "ए", "ii": "ई", "i": "इ",
+    "oo": "ऊ", "o": "ओ", "uu": "ऊ", "u": "उ"
+  };
+
+  const VOWEL_MATRA = {
+    "aa": "ा", "a": "", "ai": "ै", "au": "ौ",
+    "ee": "ी", "e": "े", "ii": "ी", "i": "ि",
+    "oo": "ू", "o": "ो", "uu": "ू", "u": "ु"
+  };
+
+  const CONSONANTS = [
+    ["ksha", "क्ष"], ["ksh", "क्ष"], ["dnya", "ज्ञ"], ["shra", "श्र"], ["tra", "त्र"],
+    ["kh", "ख"], ["gh", "घ"], ["chh", "छ"], ["ch", "च"], ["jh", "झ"],
+    ["th", "थ"], ["dh", "ध"], ["ph", "फ"], ["bh", "भ"], ["sh", "श"],
+    ["zh", "झ"], ["ng", "ंग"], ["ny", "ञ"],
+    ["k", "क"], ["g", "ग"], ["c", "क"], ["j", "ज"], ["t", "ट"],
+    ["d", "ड"], ["n", "न"], ["p", "प"], ["f", "फ"], ["b", "ब"],
+    ["m", "म"], ["y", "य"], ["r", "र"], ["l", "ल"], ["v", "व"],
+    ["w", "व"], ["s", "स"], ["h", "ह"], ["z", "झ"], ["q", "क"], ["x", "क्स"]
+  ];
+
+  function phoneticWord(w) {
+    let s = w.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!s) return "";
+    if (MARATHI_DICTIONARY[s]) return MARATHI_DICTIONARY[s];
+
+    // Check weights like 500g, 1kg, 200gm
+    const unitMatch = s.match(/^(\d+)(g|gm|kg|ml|ltr)$/);
+    if (unitMatch) {
+      const devDigits = ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"];
+      const num = unitMatch[1].split("").map((d) => devDigits[parseInt(d)]).join("");
+      const u = unitMatch[2];
+      const uMap = { g: " ग्रॅम", gm: " ग्रॅम", kg: " किलो", ml: " मिली", ltr: " लिटर" };
+      return num + (uMap[u] || "");
+    }
+
+    let res = "";
+    let i = 0;
+    let lastWasConsonant = false;
+
+    while (i < s.length) {
+      // Devanagari Digits
+      if (s[i] >= "0" && s[i] <= "9") {
+        const devDigits = ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"];
+        res += devDigits[parseInt(s[i])];
+        lastWasConsonant = false;
+        i++;
+        continue;
+      }
+
+      // Two-letter vowel
+      let twoV = s.substring(i, i + 2);
+      if (VOWEL_MATRA[twoV] !== undefined) {
+        if (lastWasConsonant) {
+          res += VOWEL_MATRA[twoV];
+        } else {
+          res += VOWEL_STANDALONE[twoV] || VOWEL_MATRA[twoV];
+        }
+        lastWasConsonant = false;
+        i += 2;
+        continue;
+      }
+
+      // One-letter vowel
+      let oneV = s[i];
+      if (VOWEL_MATRA[oneV] !== undefined) {
+        if (lastWasConsonant) {
+          if (oneV !== "a") {
+            res += VOWEL_MATRA[oneV];
+          }
+        } else {
+          res += VOWEL_STANDALONE[oneV] || VOWEL_MATRA[oneV];
+        }
+        lastWasConsonant = false;
+        i++;
+        continue;
+      }
+
+      // Consonants (longest match first)
+      let matched = false;
+      for (const [latin, dev] of CONSONANTS) {
+        if (s.startsWith(latin, i)) {
+          if (lastWasConsonant) {
+            res += "्";
+          }
+          res += dev;
+          lastWasConsonant = true;
+          i += latin.length;
+          matched = true;
+          break;
+        }
+      }
+
+      if (!matched) {
+        i++;
+      }
+    }
+
+    return res;
+  }
+
+  function transliterateToMarathi(input) {
+    if (!input || typeof input !== "string") return "";
+    const tokens = input.split(/([^\w\d]+)/);
+    return tokens
+      .map((token) => {
+        if (!token) return "";
+        if (/^[^\w\d]+$/.test(token)) return token;
+        const clean = token.toLowerCase();
+        if (MARATHI_DICTIONARY[clean]) {
+          return MARATHI_DICTIONARY[clean];
+        }
+        return phoneticWord(token);
+      })
+      .join("");
+  }
+
+  // ==========================================================================
   // PRODUCT ACTIONS (CRUD & CONFIG)
   // ==========================================================================
   function resetUploadZoneStatus() {
@@ -1274,6 +1716,7 @@
 
   function openAddProductModal() {
     state.editingProduct = null;
+    state.userCustomizedMarathi = false;
     document.getElementById("modalProductTitle").textContent = "Add New Spice Remedy / Product";
     document.getElementById("prodFormId").value = "";
     document.getElementById("prodFormName").value = "";
@@ -1298,6 +1741,7 @@
     if (!p) return;
 
     state.editingProduct = p;
+    state.userCustomizedMarathi = !!(p.nameMr && p.nameMr.trim());
     document.getElementById("modalProductTitle").textContent = "Configure Product: " + p.name;
     document.getElementById("prodFormId").value = p.id;
     document.getElementById("prodFormName").value = p.name;
@@ -1843,6 +2287,78 @@
       saveProdBtn.addEventListener("click", saveProductForm);
     }
 
+    // Real-time English to Marathi transliteration for product modal
+    const prodNameInput = document.getElementById("prodFormName");
+    const prodNameMrInput = document.getElementById("prodFormNameMr");
+    const btnAutoMarathi = document.getElementById("btnAutoMarathi");
+    let marathiDebounceTimer = null;
+
+    function syncMarathiName(immediateOnly = false) {
+      if (!prodNameInput || !prodNameMrInput) return;
+      if (state.userCustomizedMarathi) return;
+
+      const val = prodNameInput.value;
+      if (!val || !val.trim()) {
+        prodNameMrInput.value = "";
+        return;
+      }
+
+      // 1. Instant offline transliteration (0ms latency)
+      prodNameMrInput.value = transliterateToMarathi(val);
+
+      // 2. Debounced online enhancement (if browser is connected)
+      if (!immediateOnly && typeof fetch === "function") {
+        clearTimeout(marathiDebounceTimer);
+        marathiDebounceTimer = setTimeout(async () => {
+          if (state.userCustomizedMarathi) return;
+          const currentEng = prodNameInput.value.trim();
+          if (!currentEng) return;
+          try {
+            const url = `https://inputtools.google.com/request?text=${encodeURIComponent(currentEng)}&itc=mr-t-i0-und&num=1&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage`;
+            const res = await fetch(url);
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data && data[0] === "SUCCESS" && data[1] && data[1][0] && data[1][0][1] && data[1][0][1][0]) {
+              const suggested = data[1][0][1][0];
+              if (!state.userCustomizedMarathi && prodNameInput.value.trim() === currentEng) {
+                prodNameMrInput.value = suggested;
+              }
+            }
+          } catch (e) {
+            // Keep local transliteration
+          }
+        }, 300);
+      }
+    }
+
+    if (prodNameInput) {
+      prodNameInput.addEventListener("input", function () {
+        syncMarathiName(false);
+      });
+    }
+
+    if (prodNameMrInput) {
+      prodNameMrInput.addEventListener("input", function () {
+        if (this.value.trim().length > 0) {
+          state.userCustomizedMarathi = true;
+        } else {
+          // If cleared, re-enable auto-sync
+          state.userCustomizedMarathi = false;
+          syncMarathiName(true);
+        }
+      });
+    }
+
+    if (btnAutoMarathi) {
+      btnAutoMarathi.addEventListener("click", function () {
+        state.userCustomizedMarathi = false;
+        syncMarathiName(false);
+        if (prodNameMrInput && prodNameMrInput.value) {
+          toast("Marathi title automatically updated!");
+        }
+      });
+    }
+
     // File Upload Handler (Option to upload image from device)
     const fileInput = document.getElementById("prodFormImgFile");
     if (fileInput) {
@@ -1923,6 +2439,7 @@
   window.BK_CRM = {
     openAddProductModal,
     openEditProductModal,
+    transliterateToMarathi,
     toggleProductStock,
     deleteProduct,
     updateOrderStatus,
