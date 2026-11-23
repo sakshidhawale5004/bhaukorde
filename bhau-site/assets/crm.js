@@ -28,7 +28,15 @@
     gstin: "27AAACB1234F1Z5",
     freeDeliveryThreshold: 500,
     shippingFee: 50,
-    currencySymbol: "₹"
+    currencySymbol: "₹",
+    // Razorpay Payment Gateway Configuration
+    razorpayEnabled: true,
+    razorpayMode: "test",
+    razorpayKeyId: "rzp_test_1DP5mmOlF5G5ag",
+    razorpayKeySecret: "",
+    razorpayMerchantName: "Bhau Korde Masale",
+    razorpayThemeColor: "#c8501e",
+    razorpayChannels: ["upi", "cards", "netbanking"]
   };
 
   // Default 31 Products (Configurable Catalog)
@@ -1036,7 +1044,15 @@
             </div>
           </td>
           <td style="font-size:12px;line-height:1.4">${itemSummary}</td>
-          <td><b>${rs(o.total)}</b><div style="font-size:10.5px;color:var(--muted)">${esc(o.payment)}</div></td>
+          <td>
+            <b>${rs(o.total)}</b>
+            <div style="font-size:10.5px;color:var(--muted)">${esc(o.payment || "WhatsApp Order")}</div>
+            ${
+              o.paymentId || (o.payment && o.payment.toLowerCase().includes("razorpay"))
+                ? `<span class="pay-badge rzp" title="Payment ID: ${esc(o.paymentId || 'Online')}"><i class="bi bi-shield-check"></i> PAID · RZP</span>`
+                : `<span class="pay-badge cod"><i class="bi bi-cash-stack"></i> COD / WhatsApp</span>`
+            }
+          </td>
           <td>
             <select class="filter-select" style="font-size:12px;padding:4px 8px;" onchange="window.BK_CRM.updateOrderStatus('${esc(o.id)}', this.value)">
               <option value="pending" ${o.status === "pending" ? "selected" : ""}>New Order</option>
@@ -1050,6 +1066,9 @@
             <div class="action-btns">
               <button class="btn-whatsapp" title="Send WhatsApp Update" onclick="window.BK_CRM.sendOrderWhatsApp('${esc(o.id)}')">
                 <i class="bi bi-whatsapp"></i> Chat
+              </button>
+              <button class="action-icon-btn" title="Send / Share Razorpay Payment Link" onclick="window.BK_CRM.sendPaymentLink('${esc(o.id)}')">
+                <i class="bi bi-credit-card-2-front"></i>
               </button>
               <button class="action-icon-btn" title="View Print Slip" onclick="window.BK_CRM.viewOrderSlip('${esc(o.id)}')">
                 <i class="bi bi-receipt"></i>
@@ -1212,17 +1231,66 @@
   function renderSettings() {
     const s = state.settings;
     const form = document.getElementById("crmSettingsForm");
-    if (!form) return;
+    if (form) {
+      document.getElementById("setStoreName").value = s.storeName || "";
+      document.getElementById("setTagline").value = s.tagline || "";
+      document.getElementById("setPhone").value = s.phone || "";
+      document.getElementById("setWhatsapp").value = s.whatsapp || "";
+      document.getElementById("setEmail").value = s.email || "";
+      document.getElementById("setAddress").value = s.address || "";
+      document.getElementById("setGstin").value = s.gstin || "";
+      document.getElementById("setFreeDelivery").value = s.freeDeliveryThreshold || 500;
+      document.getElementById("setShippingFee").value = s.shippingFee || 50;
+    }
 
-    document.getElementById("setStoreName").value = s.storeName || "";
-    document.getElementById("setTagline").value = s.tagline || "";
-    document.getElementById("setPhone").value = s.phone || "";
-    document.getElementById("setWhatsapp").value = s.whatsapp || "";
-    document.getElementById("setEmail").value = s.email || "";
-    document.getElementById("setAddress").value = s.address || "";
-    document.getElementById("setGstin").value = s.gstin || "";
-    document.getElementById("setFreeDelivery").value = s.freeDeliveryThreshold || 500;
-    document.getElementById("setShippingFee").value = s.shippingFee || 50;
+    const rzpForm = document.getElementById("crmPaymentGatewayForm");
+    if (rzpForm) {
+      const isEnabled = s.razorpayEnabled !== false;
+      const rzpMode = s.razorpayMode || "test";
+      const keyId = s.razorpayKeyId || "";
+
+      const elEnabled = document.getElementById("setRzpEnabled");
+      if (elEnabled) elEnabled.checked = isEnabled;
+
+      const elMode = document.getElementById("setRzpMode");
+      if (elMode) elMode.value = rzpMode;
+
+      const elKeyId = document.getElementById("setRzpKeyId");
+      if (elKeyId) elKeyId.value = keyId;
+
+      const elKeySec = document.getElementById("setRzpKeySecret");
+      if (elKeySec) elKeySec.value = s.razorpayKeySecret || "";
+
+      const elMName = document.getElementById("setRzpMerchantName");
+      if (elMName) elMName.value = s.razorpayMerchantName || s.storeName || "Bhau Korde Masale";
+
+      const elThemeColor = document.getElementById("setRzpThemeColor");
+      if (elThemeColor) elThemeColor.value = s.razorpayThemeColor || "#c8501e";
+
+      const elThemeColorText = document.getElementById("setRzpThemeColorText");
+      if (elThemeColorText) elThemeColorText.value = s.razorpayThemeColor || "#c8501e";
+
+      // Status badge
+      const badge = document.getElementById("razorpayStatusBadge");
+      if (badge) {
+        if (!isEnabled) {
+          badge.innerHTML = `<i class="bi bi-x-circle-fill"></i> Gateway Disabled`;
+          badge.style.background = "rgba(107, 114, 128, 0.12)";
+          badge.style.color = "#6b7280";
+          badge.style.borderColor = "rgba(107, 114, 128, 0.3)";
+        } else if (rzpMode === "live") {
+          badge.innerHTML = `<i class="bi bi-shield-check-fill"></i> Live Production`;
+          badge.style.background = "rgba(21, 128, 61, 0.12)";
+          badge.style.color = "#15803d";
+          badge.style.borderColor = "rgba(21, 128, 61, 0.3)";
+        } else {
+          badge.innerHTML = `<i class="bi bi-tools"></i> Test Mode (Sandbox)`;
+          badge.style.background = "rgba(217, 119, 6, 0.12)";
+          badge.style.color = "#d97706";
+          badge.style.borderColor = "rgba(217, 119, 6, 0.3)";
+        }
+      }
+    }
   }
 
   // Master Render
@@ -1892,6 +1960,26 @@
     window.open(url, "_blank");
   }
 
+  function sendPaymentLink(orderId) {
+    const order = state.orders.find((o) => o.id === orderId);
+    if (!order) return;
+
+    const s = state.settings;
+    const phone = (order.phone || "").replace(/[^0-9]/g, "");
+    const cleanPhone = phone.startsWith("91") ? phone : "91" + phone;
+    const mode = s.razorpayMode === "live" ? "Live" : "Test / Sandbox";
+
+    const payMessage = `Namaste ${order.customer}! 🌿\n\nThank you for ordering with *Bhau Korde Masale* (Panvel).\n\n*Order ID:* ${order.id}\n*Payable Amount:* ${rs(order.total)}\n*Payment Gateway:* Razorpay UPI (GPay/PhonePe/Paytm), Cards & Netbanking (${mode})\n\nPlease pay using our secure Razorpay payment checkout to confirm immediate dispatch:\n👉 https://bhaukorde.in/cart.html?pay=${encodeURIComponent(order.id)}&amt=${order.total}\n\nThank you!\n_चवीने खाणार त्याला भाऊ देणार._`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(payMessage).catch(() => {});
+    }
+
+    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(payMessage)}`;
+    window.open(url, "_blank");
+    toast(`Razorpay payment request link prepared for order ${order.id}!`);
+  }
+
   function viewOrderSlip(orderId) {
     const order = state.orders.find((o) => o.id === orderId);
     if (!order) return;
@@ -1928,6 +2016,7 @@
             <div style="font-size:13px;font-weight:700;color:#c8501e">${esc(order.id)}</div>
             <div style="font-size:11.5px;color:#7a6e65">Date: ${esc(order.date)}</div>
             <div style="font-size:11.5px;color:#7a6e65">Payment: <b>${esc(order.payment)}</b></div>
+            ${order.paymentId ? `<div style="font-size:11px;color:#15803d;font-weight:600;margin-top:2px"><i class="bi bi-shield-check"></i> RZP Ref: ${esc(order.paymentId)}</div>` : ""}
           </div>
         </div>
 
@@ -1965,6 +2054,9 @@
           <div>GST (Inclusive): <b>Included</b></div>
           <div>Shipping & Delivery: <b style="color:#15803d">FREE</b></div>
           <div style="font-size:16px;border-top:1px solid #271f1a;padding-top:6px;margin-top:4px">Total Amount: <b style="color:#c8501e">${rs(order.total)}</b></div>
+          <div style="font-size:11px;margin-top:4px;color:${order.paymentId || (order.payment && order.payment.includes('Razorpay')) ? '#15803d' : '#b45309'}">
+            Payment Status: <b>${order.paymentId || (order.payment && order.payment.includes('Razorpay')) ? 'PAID ONLINE (RAZORPAY)' : 'CASH ON DELIVERY / WHATSAPP'}</b>
+          </div>
         </div>
 
         <div style="margin-top:24px;border-top:1px dashed #d3c4b7;padding-top:12px;font-size:11px;color:#7a6e65;text-align:center">
@@ -2089,10 +2181,24 @@
   }
 
   function exportOrdersCSV() {
-    const rows = [["Order ID", "Date", "Customer Name", "Phone", "Email", "City", "Payment Method", "Status", "Total Amount (INR)", "Items Summary"]];
+    const rows = [["Order ID", "Date", "Customer Name", "Phone", "Email", "City", "Payment Method", "Payment Reference ID", "Payment Status", "Order Status", "Total Amount (INR)", "Items Summary"]];
     state.orders.forEach((o) => {
       const summary = o.items.map((i) => `${i.name} (${i.size}) x${i.qty}`).join(" | ");
-      rows.push([o.id, o.date, o.customer, o.phone, o.email, o.city, o.payment, o.status, o.total, summary]);
+      const isPaid = !!o.paymentId || (o.payment && o.payment.toLowerCase().includes("razorpay"));
+      rows.push([
+        o.id,
+        o.date,
+        o.customer,
+        o.phone,
+        o.email,
+        o.city,
+        o.payment || "WhatsApp Order",
+        o.paymentId || "N/A",
+        isPaid ? "PAID" : "PENDING/COD",
+        o.status,
+        o.total,
+        summary
+      ]);
     });
     downloadCSV("bhau_korde_orders_report.csv", rows);
   }
@@ -2421,6 +2527,78 @@
       });
     }
 
+    // Razorpay Gateway settings form
+    const rzpForm = document.getElementById("crmPaymentGatewayForm");
+    if (rzpForm) {
+      rzpForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const enabled = document.getElementById("setRzpEnabled") ? document.getElementById("setRzpEnabled").checked : true;
+        const mode = document.getElementById("setRzpMode") ? document.getElementById("setRzpMode").value : "test";
+        const keyId = document.getElementById("setRzpKeyId") ? document.getElementById("setRzpKeyId").value.trim() : "";
+        const keySecret = document.getElementById("setRzpKeySecret") ? document.getElementById("setRzpKeySecret").value.trim() : "";
+        const merchantName = document.getElementById("setRzpMerchantName") ? document.getElementById("setRzpMerchantName").value.trim() : "Bhau Korde Masale";
+        const themeColor = document.getElementById("setRzpThemeColor") ? document.getElementById("setRzpThemeColor").value : "#c8501e";
+
+        state.settings.razorpayEnabled = enabled;
+        state.settings.razorpayMode = mode;
+        state.settings.razorpayKeyId = keyId;
+        state.settings.razorpayKeySecret = keySecret;
+        state.settings.razorpayMerchantName = merchantName;
+        state.settings.razorpayThemeColor = themeColor;
+
+        saveData(STORAGE.SETTINGS, state.settings);
+        renderSettings();
+        toast("Razorpay payment gateway configuration saved!");
+      });
+    }
+
+    // Toggle Razorpay secret visibility
+    const btnToggleSecret = document.getElementById("btnToggleRzpSecret");
+    if (btnToggleSecret) {
+      btnToggleSecret.addEventListener("click", function () {
+        const input = document.getElementById("setRzpKeySecret");
+        if (input) {
+          if (input.type === "password") {
+            input.type = "text";
+            this.innerHTML = '<i class="bi bi-eye-slash"></i>';
+          } else {
+            input.type = "password";
+            this.innerHTML = '<i class="bi bi-eye"></i>';
+          }
+        }
+      });
+    }
+
+    // Sync theme color picker & hex input
+    const rzpColor = document.getElementById("setRzpThemeColor");
+    const rzpColorText = document.getElementById("setRzpThemeColorText");
+    if (rzpColor && rzpColorText) {
+      rzpColor.addEventListener("input", (e) => (rzpColorText.value = e.target.value));
+      rzpColorText.addEventListener("input", (e) => {
+        if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) rzpColor.value = e.target.value;
+      });
+    }
+
+    // Validate Razorpay Key ID button
+    const btnTestKey = document.getElementById("btnTestRzpKey");
+    if (btnTestKey) {
+      btnTestKey.addEventListener("click", function () {
+        const key = (document.getElementById("setRzpKeyId")?.value || "").trim();
+        const mode = document.getElementById("setRzpMode")?.value || "test";
+        if (!key) {
+          toast("Please enter a Razorpay Key ID to validate.", "error");
+          return;
+        }
+        if (mode === "test" && !key.startsWith("rzp_test_")) {
+          toast("Notice: Test mode key usually begins with 'rzp_test_'", "info");
+        } else if (mode === "live" && !key.startsWith("rzp_live_")) {
+          toast("Notice: Live mode key usually begins with 'rzp_live_'", "info");
+        } else {
+          toast("Razorpay Key ID format is valid (" + mode.toUpperCase() + " Mode)!", "success");
+        }
+      });
+    }
+
     // Backup restore input
     const importInput = document.getElementById("importBackupFile");
     if (importInput) {
@@ -2444,6 +2622,7 @@
     deleteProduct,
     updateOrderStatus,
     sendOrderWhatsApp,
+    sendPaymentLink,
     viewOrderSlip,
     deleteOrder,
     filterOrders: function (st) {

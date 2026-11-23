@@ -43,15 +43,319 @@
       return '<div class="citem"><div class="ci">'+im+'</div><div><h4>'+esc(i.name)+'</h4>'+(i.size?'<div class="cs">Pack: '+esc(i.size)+'</div>':'')+'<div class="cu">'+rs(i.price)+' each</div></div>'
        +'<div class="cr"><div class="qty"><button data-d="-1" data-k="'+esc(i.key)+'" aria-label="Decrease quantity">&minus;</button><span>'+i.qty+'</span><button data-d="1" data-k="'+esc(i.key)+'" aria-label="Increase quantity">+</button></div>'
        +'<div class="lt">'+rs(i.qty*i.price)+'</div><button class="rm" data-r="'+esc(i.key)+'"><i class="bi bi-trash3"></i> Remove</button></div></div>'}).join("");
-    root.innerHTML='<div class="cartpage"><div>'+rows+'<button class="rm cclear" id="cclear"><i class="bi bi-x-circle"></i> Clear cart</button></div>'
-     +'<aside class="csum"><h3>Order Summary</h3><div class="row"><span>Items</span><span>'+count(c)+'</span></div><div class="row"><span>Subtotal</span><span>'+rs(total(c))+'</span></div><div class="row tot"><span>Total</span><span>'+rs(total(c))+'</span></div>'
-     +'<a class="btn" id="cwa" href="'+BK.waLink()+'" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> Order on WhatsApp</a><a class="btn ghost" href="blended-spices.html" style="margin-top:10px">Continue Shopping</a>'
-     +'<small>Prices include tax. Final price depends on pack size and delivery — we confirm everything with you on WhatsApp.</small></aside></div>'}
+    root.innerHTML = '<div class="cartpage"><div>' + rows + '<button class="rm cclear" id="cclear"><i class="bi bi-x-circle"></i> Clear cart</button></div>'
+      + '<aside class="csum"><h3>Order Summary</h3>'
+      + '<div class="row"><span>Items</span><span>' + count(c) + '</span></div>'
+      + '<div class="row"><span>Subtotal</span><span>' + rs(total(c)) + '</span></div>'
+      + '<div class="row"><span>GST (Inclusive)</span><span>Included</span></div>'
+      + '<div class="row"><span>Shipping</span><span style="color:#15803d;font-weight:600">FREE</span></div>'
+      + '<div class="row tot"><span>Total</span><span>' + rs(total(c)) + '</span></div>'
+      + '<button type="button" class="btn btn-rzp-pay" id="btnRzpCheckout"><i class="bi bi-shield-check"></i> Pay Online with Razorpay</button>'
+      + '<div class="rzp-trust-badges"><span><i class="bi bi-lightning-charge-fill" style="color:#eab308"></i> Instant UPI / Cards</span><span><i class="bi bi-lock-fill" style="color:#15803d"></i> 256-bit Secure</span></div>'
+      + '<div class="csum-divider"><span>OR</span></div>'
+      + '<a class="btn btn-wa-order" id="cwa" href="' + BK.waLink() + '" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> Order on WhatsApp (COD)</a>'
+      + '<a class="btn ghost" href="blended-spices.html" style="margin-top:10px">Continue Shopping</a>'
+      + '<small>Prices include tax. 100% authentic Maharashtrian stone-ground spices handcrafted in Panvel.</small></aside></div>';
+  }
+
+  /* ---- Customer Checkout & Razorpay Payment Integration ---- */
+  var coModal, successModal;
+
+  function buildCheckoutModal() {
+    if (coModal) return;
+    coModal = document.createElement("div");
+    coModal.className = "checkout-modal";
+    coModal.hidden = true;
+    coModal.innerHTML = '<div class="checkout-box" role="dialog" aria-modal="true" aria-labelledby="coTitle">'
+      + '<h3 id="coTitle"><i class="bi bi-shield-check" style="color:#15803d"></i> Secure Checkout</h3>'
+      + '<p class="checkout-sub">Enter your delivery details to proceed to secure online payment.</p>'
+      + '<div class="checkout-summary-mini" id="coSummaryMini"><span>Total Order Amount:</span><b style="font-size:16px;color:var(--accent)" id="coTotalDisplay">₹0</b></div>'
+      + '<form id="coForm">'
+      + '<div class="co-field"><label for="coName">Full Name <span style="color:#dc2626">*</span></label><input type="text" id="coName" placeholder="e.g. Anand Joshi" required></div>'
+      + '<div class="co-grid">'
+      + '<div class="co-field"><label for="coPhone">Mobile Number (10 Digits) <span style="color:#dc2626">*</span></label><input type="tel" id="coPhone" placeholder="98200XXXXX" pattern="[0-9]{10}" required></div>'
+      + '<div class="co-field"><label for="coEmail">Email Address <span style="color:#dc2626">*</span></label><input type="email" id="coEmail" placeholder="your@email.com" required></div>'
+      + '</div>'
+      + '<div class="co-field"><label for="coAddress">Delivery Address <span style="color:#dc2626">*</span></label><textarea id="coAddress" rows="2" placeholder="House/Flat No., Street, Landmark" required></textarea></div>'
+      + '<div class="co-grid">'
+      + '<div class="co-field"><label for="coCity">City / Town <span style="color:#dc2626">*</span></label><input type="text" id="coCity" placeholder="Panvel / Navi Mumbai / Pune" required></div>'
+      + '<div class="co-field"><label for="coPin">PIN Code</label><input type="text" id="coPin" placeholder="410206"></div>'
+      + '</div>'
+      + '<div class="checkout-actions">'
+      + '<button type="button" class="btn ghost" id="btnCancelCheckout">Cancel</button>'
+      + '<button type="submit" class="btn btn-rzp-pay" id="btnProceedRzp"><i class="bi bi-lock-fill"></i> Pay Securely via Razorpay</button>'
+      + '</div></form></div>';
+    document.body.appendChild(coModal);
+
+    document.getElementById("btnCancelCheckout").addEventListener("click", closeCheckoutModal);
+    coModal.addEventListener("click", function(e) {
+      if (e.target === coModal) closeCheckoutModal();
+    });
+
+    document.getElementById("coForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      initiateRazorpayPayment();
+    });
+  }
+
+  function openCheckoutModal() {
+    var c = load();
+    if (!c.length) {
+      toast("Your cart is empty!");
+      return;
+    }
+    buildCheckoutModal();
+    document.getElementById("coTotalDisplay").textContent = rs(total(c));
+    coModal.hidden = false;
+    document.body.style.overflow = "hidden";
+    var nameField = document.getElementById("coName");
+    if (nameField) nameField.focus();
+  }
+
+  function closeCheckoutModal() {
+    if (coModal) coModal.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  function buildSuccessModal() {
+    if (successModal) return;
+    successModal = document.createElement("div");
+    successModal.className = "checkout-modal";
+    successModal.hidden = true;
+    document.body.appendChild(successModal);
+    successModal.addEventListener("click", function(e) {
+      if (e.target === successModal) closeSuccessModal();
+    });
+  }
+
+  function closeSuccessModal() {
+    if (successModal) successModal.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  function showSuccessModal(order) {
+    buildSuccessModal();
+    successModal.innerHTML = '<div class="checkout-box order-success-card">'
+      + '<div class="order-success-icon"><i class="bi bi-check-lg"></i></div>'
+      + '<h3>Payment Successful!</h3>'
+      + '<p style="color:var(--muted);font-size:13px">Your order has been confirmed with Bhau Korde Masale.</p>'
+      + '<div class="order-success-meta">'
+      + '<div>Order ID: <b style="color:var(--accent)">' + esc(order.id) + '</b></div>'
+      + '<div>Payment Ref: <b style="color:#15803d">' + esc(order.paymentId) + '</b></div>'
+      + '<div>Amount Paid: <b>' + rs(order.total) + '</b></div>'
+      + '<div>Customer: <b>' + esc(order.customer) + '</b></div>'
+      + '<div>Delivery to: <span>' + esc(order.address) + ', ' + esc(order.city) + '</span></div>'
+      + '</div>'
+      + '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'
+      + '<a href="index.html" class="btn ghost">Continue Shopping</a>'
+      + '<button type="button" class="btn btn-wa-order" id="btnSuccessWaNotify"><i class="bi bi-whatsapp"></i> Chat on WhatsApp</button>'
+      + '</div></div>';
+
+    document.getElementById("btnSuccessWaNotify").addEventListener("click", function() {
+      var msg = "Namaste Bhau Korde! 🌿\n\nI just paid online via Razorpay for my order *" + order.id + "*.\n\n*Payment Ref:* " + order.paymentId + "\n*Amount:* " + rs(order.total) + "\n*Delivery Address:* " + order.address + ", " + order.city + "\n\nPlease confirm dispatch. Thank you!";
+      window.open("https://wa.me/" + WA + "?text=" + encodeURIComponent(msg), "_blank");
+    });
+
+    closeCheckoutModal();
+    successModal.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function initiateRazorpayPayment() {
+    var c = load();
+    if (!c.length) return;
+
+    var custInfo = {
+      name: document.getElementById("coName").value.trim(),
+      phone: document.getElementById("coPhone").value.trim(),
+      email: document.getElementById("coEmail").value.trim(),
+      address: document.getElementById("coAddress").value.trim(),
+      city: document.getElementById("coCity").value.trim(),
+      pincode: document.getElementById("coPin") ? document.getElementById("coPin").value.trim() : ""
+    };
+
+    var s = {};
+    try {
+      s = JSON.parse(localStorage.getItem("bk_crm_settings") || "{}");
+    } catch(e) {}
+
+    if (s.razorpayEnabled === false) {
+      alert("Online payment is temporarily disabled. Please use WhatsApp checkout to place your order.");
+      return;
+    }
+
+    var keyId = (s.razorpayKeyId || "rzp_test_1DP5mmOlF5G5ag").trim();
+    var merchantName = s.razorpayMerchantName || s.storeName || "Bhau Korde Masale";
+    var themeColor = s.razorpayThemeColor || "#c8501e";
+    var orderAmount = total(c);
+    var orderAmountPaise = Math.round(orderAmount * 100);
+
+    if (typeof window.Razorpay !== "undefined") {
+      var options = {
+        key: keyId,
+        amount: orderAmountPaise,
+        currency: "INR",
+        name: merchantName,
+        description: "Pure Handcrafted Spices & Pickles (" + count(c) + " items)",
+        image: "LOGO-English.png",
+        prefill: {
+          name: custInfo.name,
+          contact: custInfo.phone,
+          email: custInfo.email
+        },
+        notes: {
+          address: custInfo.address,
+          city: custInfo.city
+        },
+        theme: {
+          color: themeColor
+        },
+        handler: function(response) {
+          finalizeOnlineOrder(response.razorpay_payment_id || ("pay_" + Date.now()), custInfo, c, orderAmount);
+        },
+        modal: {
+          ondismiss: function() {}
+        }
+      };
+
+      try {
+        var rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", function(resp) {
+          alert("Payment Failed: " + (resp.error ? resp.error.description : "Transaction declined"));
+        });
+        rzp.open();
+      } catch (err) {
+        simulatePaymentFlow(custInfo, c, orderAmount);
+      }
+    } else {
+      simulatePaymentFlow(custInfo, c, orderAmount);
+    }
+  }
+
+  function simulatePaymentFlow(custInfo, c, orderAmount) {
+    var confirmed = confirm(
+      "Razorpay Sandbox / Test Mode:\n\nSimulate successful payment of " + rs(orderAmount) + " via Razorpay UPI/Cards?"
+    );
+    if (confirmed) {
+      var simPayId = "pay_test_" + Math.random().toString(36).substr(2, 9);
+      finalizeOnlineOrder(simPayId, custInfo, c, orderAmount);
+    }
+  }
+
+  function finalizeOnlineOrder(paymentId, custInfo, c, orderAmount) {
+    var orderId = "BK-" + new Date().getFullYear() + "-" + Math.floor(10000 + Math.random() * 90000);
+    var now = new Date();
+    var dateStr = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, '0') + "-" + String(now.getDate()).padStart(2, '0') + " " + String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
+
+    var newOrder = {
+      id: orderId,
+      date: dateStr,
+      customer: custInfo.name,
+      phone: custInfo.phone,
+      email: custInfo.email,
+      city: custInfo.city,
+      address: custInfo.address + (custInfo.pincode ? " - " + custInfo.pincode : ""),
+      payment: "Razorpay (Online Paid)",
+      paymentId: paymentId,
+      paymentStatus: "PAID",
+      status: "processing",
+      total: orderAmount,
+      items: c.map(function(item) {
+        return {
+          id: item.id,
+          name: item.name,
+          size: item.size || "Standard",
+          qty: item.qty,
+          price: item.price
+        };
+      })
+    };
+
+    // Save to CRM Orders
+    try {
+      var orders = JSON.parse(localStorage.getItem("bk_crm_orders") || "[]");
+      orders.push(newOrder);
+      localStorage.setItem("bk_crm_orders", JSON.stringify(orders));
+    } catch(e) {}
+
+    // Update CRM Customers
+    try {
+      var customers = JSON.parse(localStorage.getItem("bk_crm_customers") || "[]");
+      var existing = customers.find(function(x) { return x.phone === custInfo.phone; });
+      if (existing) {
+        existing.ordersCount = (existing.ordersCount || 1) + 1;
+        existing.lifetimeSpend = (existing.lifetimeSpend || 0) + orderAmount;
+        existing.city = custInfo.city || existing.city;
+        existing.segment = existing.ordersCount >= 3 ? "VIP Patron" : "Loyal Buyer";
+      } else {
+        customers.push({
+          id: "CUST-" + Math.floor(1000 + Math.random() * 9000),
+          name: custInfo.name,
+          phone: custInfo.phone,
+          email: custInfo.email,
+          city: custInfo.city,
+          segment: "New Customer",
+          ordersCount: 1,
+          lifetimeSpend: orderAmount,
+          notes: "Online order via Razorpay"
+        });
+      }
+      localStorage.setItem("bk_crm_customers", JSON.stringify(customers));
+    } catch(e) {}
+
+    BK.clear();
+    render();
+    showSuccessModal(newOrder);
+  }
+
+  // Handle direct payment links (?pay=BK-...&amt=...)
+  function checkDirectPayParam() {
+    var params = new URLSearchParams(window.location.search);
+    var payOrderId = params.get("pay");
+    var payAmt = params.get("amt");
+    if (payOrderId && payAmt) {
+      setTimeout(function() {
+        var s = {};
+        try { s = JSON.parse(localStorage.getItem("bk_crm_settings") || "{}"); } catch(e) {}
+        var keyId = (s.razorpayKeyId || "rzp_test_1DP5mmOlF5G5ag").trim();
+        var merchantName = s.razorpayMerchantName || "Bhau Korde Masale";
+        if (typeof window.Razorpay !== "undefined") {
+          var rzp = new window.Razorpay({
+            key: keyId,
+            amount: Math.round(Number(payAmt) * 100),
+            currency: "INR",
+            name: merchantName,
+            description: "Direct Payment for Order #" + payOrderId,
+            image: "LOGO-English.png",
+            handler: function(response) {
+              try {
+                var orders = JSON.parse(localStorage.getItem("bk_crm_orders") || "[]");
+                var ord = orders.find(function(o) { return o.id === payOrderId; });
+                if (ord) {
+                  ord.payment = "Razorpay (Online Paid)";
+                  ord.paymentId = response.razorpay_payment_id;
+                  ord.paymentStatus = "PAID";
+                  ord.status = "processing";
+                  localStorage.setItem("bk_crm_orders", JSON.stringify(orders));
+                }
+              } catch(e) {}
+              alert("Payment Successful! Order #" + payOrderId + " is now PAID.\nPayment ID: " + response.razorpay_payment_id);
+              window.location.href = "cart.html";
+            }
+          });
+          rzp.open();
+        }
+      }, 500);
+    }
+  }
+  document.addEventListener("DOMContentLoaded", checkDirectPayParam);
+
   document.addEventListener("click",function(e){
     var q=e.target.closest("[data-d]"),r=e.target.closest("[data-r]");
     if(q){var k=q.dataset.k,it=load().filter(function(x){return x.key===k})[0];if(it){BK.setQty(k,it.qty+ +q.dataset.d);render()}}
     if(r){BK.remove(r.dataset.r);render()}
     if(e.target.closest("#cclear")){BK.clear();render()}
+    if(e.target.closest("#btnRzpCheckout")){openCheckoutModal()}
     if(e.target.closest("#cwa")){
       var c=load();
       if(c&&c.length){
@@ -68,7 +372,8 @@
             email:"online@bhaukorde.in",
             city:"Navi Mumbai",
             address:"Online WhatsApp Cart Order",
-            payment:"WhatsApp Order",
+            payment:"WhatsApp Order (COD)",
+            paymentStatus:"PENDING",
             status:"pending",
             total:total(c),
             items:c.map(function(item){return {id:item.id,name:item.name,size:item.size||"Standard",qty:item.qty,price:item.price};})

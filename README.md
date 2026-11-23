@@ -50,6 +50,12 @@ This repository contains the complete responsive storefront and **Staff CRM & Co
    - Full database backup to encrypted JSON & 1-click restore.
    - CSV export utilities for Products, Orders, Customers, and Inquiries.
    - Factory catalog reset.
+8. **Razorpay Payment Gateway Integration**:
+   - **CRM Gateway Settings**: Configure Razorpay Key ID, Key Secret, Sandbox/Live mode, and brand color directly in CRM settings.
+   - **Storefront Checkout SDK**: Dual checkout flow with instant Razorpay online payment (UPI, GPay, PhonePe, Cards, Netbanking) and WhatsApp COD.
+   - **Direct Payment Links**: 1-click button in CRM Orders to generate and send secure online payment links to WhatsApp customers.
+   - **Invoicing & Billing**: Tax invoices and packing slips automatically display Razorpay Transaction IDs and payment settlement status.
+   - **CSV Accounting**: Exports transaction references and payment statuses for accounting and GST filing.
 
 ---
 
