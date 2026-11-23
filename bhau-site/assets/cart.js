@@ -17,13 +17,26 @@
     rs:rs,
     /* item: {id,name,price,size,img} — same id+size merges into one line */
     add:function(it,silent){
+      try {
+        var prods = JSON.parse(localStorage.getItem("bk_crm_products") || "[]");
+        var matched = prods.find(function(p){ return p.id === it.id; });
+        if (matched && (matched.status === "out-stock" || (typeof matched.stock === "number" && matched.stock <= 0))) {
+          toast(it.name + " is currently Out of Stock!", false);
+          return false;
+        }
+      } catch(e) {}
       var c=load(),k=it.id+"|"+(it.size||""),f=c.filter(function(x){return x.key===k})[0];
       if(f)f.qty++;else c.push({key:k,id:it.id,name:it.name,price:+it.price,size:it.size||"",img:it.img||"",qty:1});
-      save(c);badge();if(!silent)toast(it.name+" added to cart",true)},
+      save(c);badge();if(!silent)toast(it.name+" added to cart",true);
+      return true;
+    },
     setQty:function(k,q){var c=load();c=c.map(function(x){if(x.key===k)x.qty=q;return x}).filter(function(x){return x.qty>0});save(c);badge()},
     remove:function(k){save(load().filter(function(x){return x.key!==k}));badge()},
     clear:function(){save([]);badge()},
     items:load,count:function(){return count(load())},total:function(){return total(load())},
+    openCheckout:function(m){openCheckoutModal(m)},
+    processCODOrder:function(){processCODOrder()},
+    logFailedPayment:function(cust,c,amt,reason){logFailedPayment(cust,c,amt,reason)},
     waLink:function(){
       var c=load(),m="Hello Bhau Korde, I would like to order:\n";
       c.forEach(function(i,n){m+=(n+1)+". "+i.name+(i.size?" ("+i.size+")":"")+" x "+i.qty+" = "+rs(i.qty*i.price)+"\n"});
@@ -58,8 +71,71 @@
       + '<small>Prices include tax. 100% authentic Maharashtrian stone-ground spices handcrafted in Panvel.</small></aside></div>';
   }
 
-  /* ---- Customer Checkout & Razorpay Payment Integration ---- */
+  /* ---- Customer Checkout & Payment Integration (Online Razorpay + COD) ---- */
   var coModal, successModal;
+  var isSubmittingOrder = false;
+
+  function checkCartStock(c) {
+    try {
+      var prods = JSON.parse(localStorage.getItem("bk_crm_products") || "[]");
+      for (var i = 0; i < c.length; i++) {
+        var item = c[i];
+        var p = prods.find(function(x) { return x.id === item.id; });
+        if (p) {
+          if (p.status === "out-stock" || (typeof p.stock === "number" && p.stock <= 0)) {
+            return { ok: false, product: item.name, reason: "Out of Stock" };
+          }
+          if (typeof p.stock === "number" && p.stock < item.qty) {
+            return { ok: false, product: item.name, reason: "Only " + p.stock + " units available in stock" };
+          }
+        }
+      }
+    } catch(e) {}
+    return { ok: true };
+  }
+
+  function deductStock(items) {
+    try {
+      var prods = JSON.parse(localStorage.getItem("bk_crm_products") || "[]");
+      var changed = false;
+      items.forEach(function(item) {
+        var p = prods.find(function(x) { return x.id === item.id; });
+        if (p && typeof p.stock === "number") {
+          p.stock = Math.max(0, p.stock - (item.qty || 1));
+          if (p.stock === 0) p.status = "out-stock";
+          else if (p.stock <= 10) p.status = "low-stock";
+          changed = true;
+        }
+      });
+      if (changed) {
+        localStorage.setItem("bk_crm_products", JSON.stringify(prods));
+        try {
+          window.dispatchEvent(new StorageEvent("storage", { key: "bk_crm_products" }));
+        } catch(e) {}
+      }
+    } catch(e) {}
+  }
+
+  function logFailedPayment(custInfo, c, orderAmount, reason) {
+    try {
+      var fails = JSON.parse(localStorage.getItem("bk_crm_failed_payments") || "[]");
+      var failId = "FAIL-" + Date.now().toString(36).toUpperCase();
+      fails.unshift({
+        id: failId,
+        date: new Date().toISOString().replace("T", " ").substring(0, 19),
+        customer: custInfo.name || "Anonymous",
+        phone: custInfo.phone || "",
+        email: custInfo.email || "",
+        amount: orderAmount,
+        reason: reason || "Transaction declined / Cancelled by user",
+        itemsSummary: c.map(function(x) { return x.name + " (" + (x.size || "Standard") + ") x" + x.qty; }).join(", ")
+      });
+      localStorage.setItem("bk_crm_failed_payments", JSON.stringify(fails));
+      try {
+        window.dispatchEvent(new StorageEvent("storage", { key: "bk_crm_failed_payments" }));
+      } catch(e) {}
+    } catch(e) {}
+  }
 
   function buildCheckoutModal() {
     if (coModal) return;
@@ -67,8 +143,8 @@
     coModal.className = "checkout-modal";
     coModal.hidden = true;
     coModal.innerHTML = '<div class="checkout-box" role="dialog" aria-modal="true" aria-labelledby="coTitle">'
-      + '<h3 id="coTitle"><i class="bi bi-shield-check" style="color:#15803d"></i> Secure Checkout</h3>'
-      + '<p class="checkout-sub">Enter your delivery details to proceed to secure online payment.</p>'
+      + '<h3 id="coTitle"><i class="bi bi-shield-check" style="color:#15803d"></i> Bhau Korde Checkout</h3>'
+      + '<p class="checkout-sub">Enter your delivery details and choose your preferred payment method.</p>'
       + '<div class="checkout-summary-mini" id="coSummaryMini"><span>Total Order Amount:</span><b style="font-size:16px;color:var(--accent)" id="coTotalDisplay">₹0</b></div>'
       + '<form id="coForm">'
       + '<div class="co-field"><label for="coName">Full Name <span style="color:#dc2626">*</span></label><input type="text" id="coName" placeholder="e.g. Anand Joshi" required></div>'
@@ -81,9 +157,16 @@
       + '<div class="co-field"><label for="coCity">City / Town <span style="color:#dc2626">*</span></label><input type="text" id="coCity" placeholder="Panvel / Navi Mumbai / Pune" required></div>'
       + '<div class="co-field"><label for="coPin">PIN Code</label><input type="text" id="coPin" placeholder="410206"></div>'
       + '</div>'
-      + '<div class="checkout-actions">'
+      + '<div class="co-field"><label for="coNotes">Packaging / Delivery Instructions (Optional)</label><input type="text" id="coNotes" placeholder="e.g. Extra bubble wrap, gift box, call before delivery"></div>'
+      + '<div class="co-field" style="margin-top:12px">'
+      + '<label style="margin-bottom:6px;display:block"><b>Select Payment Method:</b></label>'
+      + '<div style="display:flex;gap:16px;flex-wrap:wrap;padding:8px 12px;background:var(--soft);border:1px solid var(--line);border-radius:6px;">'
+      + '<label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="coPayMethod" value="online" checked id="payMethodOnline"> <span><i class="bi bi-shield-check" style="color:#15803d"></i> <b>Online Payment</b> (Razorpay UPI/Cards)</span></label>'
+      + '<label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="coPayMethod" value="cod" id="payMethodCOD"> <span><i class="bi bi-cash-stack" style="color:#b45309"></i> <b>Cash on Delivery (COD)</b></span></label>'
+      + '</div></div>'
+      + '<div class="checkout-actions" style="margin-top:18px">'
       + '<button type="button" class="btn ghost" id="btnCancelCheckout">Cancel</button>'
-      + '<button type="submit" class="btn btn-rzp-pay" id="btnProceedRzp"><i class="bi bi-lock-fill"></i> Pay Securely via Razorpay</button>'
+      + '<button type="submit" class="btn btn-rzp-pay" id="btnProceedOrder"><i class="bi bi-lock-fill"></i> <span id="btnProceedText">Pay Securely via Razorpay</span></button>'
       + '</div></form></div>';
     document.body.appendChild(coModal);
 
@@ -92,20 +175,58 @@
       if (e.target === coModal) closeCheckoutModal();
     });
 
+    var rOnline = document.getElementById("payMethodOnline");
+    var rCOD = document.getElementById("payMethodCOD");
+    var btnText = document.getElementById("btnProceedText");
+
+    function updateSubmitBtn() {
+      if (rCOD && rCOD.checked) {
+        btnText.textContent = "Confirm Cash on Delivery Order";
+      } else {
+        btnText.textContent = "Pay Securely via Razorpay";
+      }
+    }
+    if (rOnline) rOnline.addEventListener("change", updateSubmitBtn);
+    if (rCOD) rCOD.addEventListener("change", updateSubmitBtn);
+
     document.getElementById("coForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      initiateRazorpayPayment();
+      var isCod = document.getElementById("payMethodCOD") && document.getElementById("payMethodCOD").checked;
+      if (isCod) {
+        processCODOrder();
+      } else {
+        initiateRazorpayPayment();
+      }
     });
   }
 
-  function openCheckoutModal() {
+  function openCheckoutModal(defaultMethod) {
     var c = load();
     if (!c.length) {
       toast("Your cart is empty!");
       return;
     }
+    var stockCheck = checkCartStock(c);
+    if (!stockCheck.ok) {
+      alert("Unable to proceed to checkout:\n" + stockCheck.product + " is " + stockCheck.reason + ".\nPlease adjust your cart before ordering.");
+      return;
+    }
+
     buildCheckoutModal();
     document.getElementById("coTotalDisplay").textContent = rs(total(c));
+    
+    if (defaultMethod === "cod") {
+      var rCOD = document.getElementById("payMethodCOD");
+      if (rCOD) rCOD.checked = true;
+    } else {
+      var rOnline = document.getElementById("payMethodOnline");
+      if (rOnline) rOnline.checked = true;
+    }
+    var btnText = document.getElementById("btnProceedText");
+    if (btnText) {
+      btnText.textContent = defaultMethod === "cod" ? "Confirm Cash on Delivery Order" : "Pay Securely via Razorpay";
+    }
+
     coModal.hidden = false;
     document.body.style.overflow = "hidden";
     var nameField = document.getElementById("coName");
@@ -115,6 +236,7 @@
   function closeCheckoutModal() {
     if (coModal) coModal.hidden = true;
     document.body.style.overflow = "";
+    isSubmittingOrder = false;
   }
 
   function buildSuccessModal() {
@@ -135,16 +257,21 @@
 
   function showSuccessModal(order) {
     buildSuccessModal();
+    var isPaid = order.paymentStatus === "PAID";
+    var title = isPaid ? "Payment Successful & Order Confirmed!" : "Order Confirmed (Cash on Delivery)!";
+    var iconClass = isPaid ? "bi-check-lg" : "bi-bag-check";
+
     successModal.innerHTML = '<div class="checkout-box order-success-card">'
-      + '<div class="order-success-icon"><i class="bi bi-check-lg"></i></div>'
-      + '<h3>Payment Successful!</h3>'
-      + '<p style="color:var(--muted);font-size:13px">Your order has been confirmed with Bhau Korde Masale.</p>'
+      + '<div class="order-success-icon"><i class="bi ' + iconClass + '"></i></div>'
+      + '<h3>' + title + '</h3>'
+      + '<p style="color:var(--muted);font-size:13px">Your authentic spice order has been registered in Bhau Korde Masale CRM.</p>'
       + '<div class="order-success-meta">'
       + '<div>Order ID: <b style="color:var(--accent)">' + esc(order.id) + '</b></div>'
-      + '<div>Payment Ref: <b style="color:#15803d">' + esc(order.paymentId) + '</b></div>'
-      + '<div>Amount Paid: <b>' + rs(order.total) + '</b></div>'
-      + '<div>Customer: <b>' + esc(order.customer) + '</b></div>'
+      + (order.paymentId ? '<div>Payment Ref: <b style="color:#15803d">' + esc(order.paymentId) + '</b></div>' : '<div>Payment Mode: <b style="color:#b45309">COD (Pay on Delivery)</b></div>')
+      + '<div>Total Amount: <b>' + rs(order.total) + '</b></div>'
+      + '<div>Customer: <b>' + esc(order.customer) + ' (' + esc(order.phone) + ')</b></div>'
       + '<div>Delivery to: <span>' + esc(order.address) + ', ' + esc(order.city) + '</span></div>'
+      + (order.packagingNotes ? '<div>Notes: <i>' + esc(order.packagingNotes) + '</i></div>' : '')
       + '</div>'
       + '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'
       + '<a href="index.html" class="btn ghost">Continue Shopping</a>'
@@ -152,7 +279,13 @@
       + '</div></div>';
 
     document.getElementById("btnSuccessWaNotify").addEventListener("click", function() {
-      var msg = "Namaste Bhau Korde! 🌿\n\nI just paid online via Razorpay for my order *" + order.id + "*.\n\n*Payment Ref:* " + order.paymentId + "\n*Amount:* " + rs(order.total) + "\n*Delivery Address:* " + order.address + ", " + order.city + "\n\nPlease confirm dispatch. Thank you!";
+      var msg = "Namaste Bhau Korde! 🌿\n\nI just placed order *" + order.id + "* on your website.\n\n"
+        + "*Total Amount:* " + rs(order.total) + "\n"
+        + "*Payment Mode:* " + order.payment + "\n"
+        + (order.paymentId ? "*Transaction ID:* " + order.paymentId + "\n" : "")
+        + "*Customer:* " + order.customer + " (" + order.phone + ")\n"
+        + "*Delivery Address:* " + order.address + ", " + order.city + "\n\n"
+        + "Please confirm and process dispatch. Thank you!";
       window.open("https://wa.me/" + WA + "?text=" + encodeURIComponent(msg), "_blank");
     });
 
@@ -161,26 +294,119 @@
     document.body.style.overflow = "hidden";
   }
 
-  function initiateRazorpayPayment() {
+  function getCustInfoFromForm() {
+    return {
+      name: (document.getElementById("coName")?.value || "").trim(),
+      phone: (document.getElementById("coPhone")?.value || "").trim(),
+      email: (document.getElementById("coEmail")?.value || "").trim(),
+      address: (document.getElementById("coAddress")?.value || "").trim(),
+      city: (document.getElementById("coCity")?.value || "").trim(),
+      pincode: (document.getElementById("coPin")?.value || "").trim(),
+      notes: (document.getElementById("coNotes")?.value || "").trim()
+    };
+  }
+
+  function processCODOrder() {
+    if (isSubmittingOrder) return;
     var c = load();
     if (!c.length) return;
 
-    var custInfo = {
-      name: document.getElementById("coName").value.trim(),
-      phone: document.getElementById("coPhone").value.trim(),
-      email: document.getElementById("coEmail").value.trim(),
-      address: document.getElementById("coAddress").value.trim(),
-      city: document.getElementById("coCity").value.trim(),
-      pincode: document.getElementById("coPin") ? document.getElementById("coPin").value.trim() : ""
+    var stockCheck = checkCartStock(c);
+    if (!stockCheck.ok) {
+      alert("Cannot place order:\n" + stockCheck.product + " is " + stockCheck.reason);
+      return;
+    }
+
+    isSubmittingOrder = true;
+    var custInfo = getCustInfoFromForm();
+    var orderAmount = total(c);
+    var orderId = "BK-" + new Date().getFullYear() + "-" + Math.floor(10000 + Math.random() * 90000);
+    var now = new Date();
+    var dateStr = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, '0') + "-" + String(now.getDate()).padStart(2, '0') + " " + String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
+
+    var newOrder = {
+      id: orderId,
+      date: dateStr,
+      customer: custInfo.name,
+      phone: custInfo.phone,
+      email: custInfo.email,
+      city: custInfo.city,
+      address: custInfo.address + (custInfo.pincode ? " - " + custInfo.pincode : ""),
+      packagingNotes: custInfo.notes,
+      payment: "Cash on Delivery (COD)",
+      paymentStatus: "PENDING",
+      status: "pending",
+      total: orderAmount,
+      items: c.map(function(item) {
+        return {
+          id: item.id,
+          name: item.name,
+          size: item.size || "Standard",
+          qty: item.qty,
+          price: item.price
+        };
+      })
     };
 
+    // Save to CRM Orders
+    try {
+      var orders = JSON.parse(localStorage.getItem("bk_crm_orders") || "[]");
+      orders.push(newOrder);
+      localStorage.setItem("bk_crm_orders", JSON.stringify(orders));
+    } catch(e) {}
+
+    // Update CRM Customers
+    try {
+      var customers = JSON.parse(localStorage.getItem("bk_crm_customers") || "[]");
+      var existing = customers.find(function(x) { return x.phone === custInfo.phone; });
+      if (existing) {
+        existing.ordersCount = (existing.ordersCount || 1) + 1;
+        existing.lifetimeSpend = (existing.lifetimeSpend || 0) + orderAmount;
+        existing.city = custInfo.city || existing.city;
+        existing.segment = existing.ordersCount >= 3 ? "VIP Patron" : "Loyal Buyer";
+      } else {
+        customers.push({
+          id: "CUST-" + Math.floor(1000 + Math.random() * 9000),
+          name: custInfo.name,
+          phone: custInfo.phone,
+          email: custInfo.email,
+          city: custInfo.city,
+          segment: "New Customer",
+          ordersCount: 1,
+          lifetimeSpend: orderAmount,
+          notes: "Placed COD order"
+        });
+      }
+      localStorage.setItem("bk_crm_customers", JSON.stringify(customers));
+    } catch(e) {}
+
+    // Automatic Stock Deduction
+    deductStock(c);
+
+    BK.clear();
+    render();
+    showSuccessModal(newOrder);
+  }
+
+  function initiateRazorpayPayment() {
+    if (isSubmittingOrder) return;
+    var c = load();
+    if (!c.length) return;
+
+    var stockCheck = checkCartStock(c);
+    if (!stockCheck.ok) {
+      alert("Cannot proceed to payment:\n" + stockCheck.product + " is " + stockCheck.reason);
+      return;
+    }
+
+    var custInfo = getCustInfoFromForm();
     var s = {};
     try {
       s = JSON.parse(localStorage.getItem("bk_crm_settings") || "{}");
     } catch(e) {}
 
     if (s.razorpayEnabled === false) {
-      alert("Online payment is temporarily disabled. Please use WhatsApp checkout to place your order.");
+      alert("Online payment is temporarily disabled. Please select Cash on Delivery to place your order.");
       return;
     }
 
@@ -190,13 +416,15 @@
     var orderAmount = total(c);
     var orderAmountPaise = Math.round(orderAmount * 100);
 
+    isSubmittingOrder = true;
+
     if (typeof window.Razorpay !== "undefined") {
       var options = {
         key: keyId,
         amount: orderAmountPaise,
         currency: "INR",
         name: merchantName,
-        description: "Pure Handcrafted Spices & Pickles (" + count(c) + " items)",
+        description: "Pure Handcrafted Spices (" + count(c) + " items)",
         image: "LOGO-English.png",
         prefill: {
           name: custInfo.name,
@@ -205,7 +433,8 @@
         },
         notes: {
           address: custInfo.address,
-          city: custInfo.city
+          city: custInfo.city,
+          packagingNotes: custInfo.notes
         },
         theme: {
           color: themeColor
@@ -214,14 +443,20 @@
           finalizeOnlineOrder(response.razorpay_payment_id || ("pay_" + Date.now()), custInfo, c, orderAmount);
         },
         modal: {
-          ondismiss: function() {}
+          ondismiss: function() {
+            isSubmittingOrder = false;
+            logFailedPayment(custInfo, c, orderAmount, "User closed payment window before completion");
+          }
         }
       };
 
       try {
         var rzp = new window.Razorpay(options);
         rzp.on("payment.failed", function(resp) {
-          alert("Payment Failed: " + (resp.error ? resp.error.description : "Transaction declined"));
+          isSubmittingOrder = false;
+          var desc = resp.error ? resp.error.description : "Transaction declined";
+          logFailedPayment(custInfo, c, orderAmount, desc);
+          alert("Payment Failed: " + desc + "\nYour cart items are preserved. You may retry or choose Cash on Delivery.");
         });
         rzp.open();
       } catch (err) {
@@ -239,6 +474,9 @@
     if (confirmed) {
       var simPayId = "pay_test_" + Math.random().toString(36).substr(2, 9);
       finalizeOnlineOrder(simPayId, custInfo, c, orderAmount);
+    } else {
+      isSubmittingOrder = false;
+      logFailedPayment(custInfo, c, orderAmount, "Simulation cancelled by user in test mode");
     }
   }
 
@@ -255,6 +493,7 @@
       email: custInfo.email,
       city: custInfo.city,
       address: custInfo.address + (custInfo.pincode ? " - " + custInfo.pincode : ""),
+      packagingNotes: custInfo.notes,
       payment: "Razorpay (Online Paid)",
       paymentId: paymentId,
       paymentStatus: "PAID",
@@ -302,6 +541,9 @@
       }
       localStorage.setItem("bk_crm_customers", JSON.stringify(customers));
     } catch(e) {}
+
+    // Automatic Stock Deduction
+    deductStock(c);
 
     BK.clear();
     render();
@@ -355,33 +597,13 @@
     if(q){var k=q.dataset.k,it=load().filter(function(x){return x.key===k})[0];if(it){BK.setQty(k,it.qty+ +q.dataset.d);render()}}
     if(r){BK.remove(r.dataset.r);render()}
     if(e.target.closest("#cclear")){BK.clear();render()}
-    if(e.target.closest("#btnRzpCheckout")){openCheckoutModal()}
+    if(e.target.closest("#btnRzpCheckout")){openCheckoutModal("online")}
     if(e.target.closest("#cwa")){
-      var c=load();
-      if(c&&c.length){
-        try{
-          var orders=JSON.parse(localStorage.getItem("bk_crm_orders")||"[]");
-          var orderId="BK-"+new Date().getFullYear()+"-"+Math.floor(10000+Math.random()*90000);
-          var now=new Date();
-          var dateStr=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,'0')+"-"+String(now.getDate()).padStart(2,'0')+" "+String(now.getHours()).padStart(2,'0')+":"+String(now.getMinutes()).padStart(2,'0');
-          orders.push({
-            id:orderId,
-            date:dateStr,
-            customer:"WhatsApp Customer",
-            phone:WA,
-            email:"online@bhaukorde.in",
-            city:"Navi Mumbai",
-            address:"Online WhatsApp Cart Order",
-            payment:"WhatsApp Order (COD)",
-            paymentStatus:"PENDING",
-            status:"pending",
-            total:total(c),
-            items:c.map(function(item){return {id:item.id,name:item.name,size:item.size||"Standard",qty:item.qty,price:item.price};})
-          });
-          localStorage.setItem("bk_crm_orders",JSON.stringify(orders));
-        }catch(err){}
-      }
+      e.preventDefault();
+      openCheckoutModal("cod");
     }});
+  document.addEventListener("DOMContentLoaded",render);
+  window.addEventListener("storage",render);
   document.addEventListener("DOMContentLoaded",render);
   window.addEventListener("storage",render);
 
