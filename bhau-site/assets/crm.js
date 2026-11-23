@@ -29,11 +29,11 @@
     freeDeliveryThreshold: 500,
     shippingFee: 50,
     currencySymbol: "₹",
-    // Razorpay Payment Gateway Configuration
+    // Razorpay Payment Gateway Configuration (Live Production)
     razorpayEnabled: true,
-    razorpayMode: "test",
-    razorpayKeyId: "rzp_test_1DP5mmOlF5G5ag",
-    razorpayKeySecret: "",
+    razorpayMode: "live",
+    razorpayKeyId: "rzp_live_U3WTW0imCLEeJr",
+    razorpayKeySecret: "jSvBCtND4EKBBTDw9dqfTELi",
     razorpayMerchantName: "Bhau Korde Masale",
     razorpayThemeColor: "#c8501e",
     razorpayChannels: ["upi", "cards", "netbanking"]
@@ -603,6 +603,14 @@
       state.settings = JSON.parse(localStorage.getItem(STORAGE.SETTINGS)) || DEFAULT_SETTINGS;
     } catch (e) {
       state.settings = DEFAULT_SETTINGS;
+    }
+
+    // Ensure live Razorpay credentials are set
+    if (!state.settings.razorpayKeyId || state.settings.razorpayKeyId.startsWith("rzp_test_")) {
+      state.settings.razorpayKeyId = "rzp_live_U3WTW0imCLEeJr";
+      state.settings.razorpayKeySecret = "jSvBCtND4EKBBTDw9dqfTELi";
+      state.settings.razorpayMode = "live";
+      saveData(STORAGE.SETTINGS, state.settings);
     }
 
     // Purge any legacy mock seed records from localStorage so the CRM starts completely clean
@@ -1246,8 +1254,8 @@
     const rzpForm = document.getElementById("crmPaymentGatewayForm");
     if (rzpForm) {
       const isEnabled = s.razorpayEnabled !== false;
-      const rzpMode = s.razorpayMode || "test";
-      const keyId = s.razorpayKeyId || "";
+      const rzpMode = s.razorpayMode || "live";
+      const keyId = s.razorpayKeyId || "rzp_live_U3WTW0imCLEeJr";
 
       const elEnabled = document.getElementById("setRzpEnabled");
       if (elEnabled) elEnabled.checked = isEnabled;
@@ -1259,7 +1267,7 @@
       if (elKeyId) elKeyId.value = keyId;
 
       const elKeySec = document.getElementById("setRzpKeySecret");
-      if (elKeySec) elKeySec.value = s.razorpayKeySecret || "";
+      if (elKeySec) elKeySec.value = s.razorpayKeySecret || "jSvBCtND4EKBBTDw9dqfTELi";
 
       const elMName = document.getElementById("setRzpMerchantName");
       if (elMName) elMName.value = s.razorpayMerchantName || s.storeName || "Bhau Korde Masale";

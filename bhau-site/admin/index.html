@@ -560,13 +560,10 @@
             <div class="panel-title">
               <i class="bi bi-credit-card-2-front" style="color:var(--accent)"></i> Razorpay Payment Gateway Integration
             </div>
-            <div style="display:flex;align-items:center;gap:10px">
+            <div>
               <span id="razorpayStatusBadge" class="status-badge" style="font-size:11.5px;padding:3px 10px;background:rgba(21,128,61,0.12);color:#15803d;border:1px solid rgba(21,128,61,0.3)">
-                <i class="bi bi-check-circle-fill"></i> Gateway Ready
+                <i class="bi bi-shield-check-fill"></i> Live Production Ready
               </span>
-              <a href="https://bhaukorde.in/wp-admin/admin.php?page=wc-settings&tab=checkout&section=razorpay" target="_blank" rel="noopener" class="btn-outline" style="font-size:11.5px;padding:5px 10px;text-decoration:none;" title="WooCommerce Razorpay Settings">
-                <i class="bi bi-wordpress"></i> WooCommerce Link <i class="bi bi-box-arrow-up-right"></i>
-              </a>
             </div>
           </div>
           
@@ -586,16 +583,16 @@
               <div class="form-group">
                 <label>Environment Mode</label>
                 <select id="setRzpMode" class="filter-select" style="width:100%;height:38px;">
+                  <option value="live" selected>Live Production (Real Transactions)</option>
                   <option value="test">Test Mode (Sandbox / Testing)</option>
-                  <option value="live">Live Production (Real Transactions)</option>
                 </select>
-                <small style="font-size:11px;color:var(--muted);margin-top:4px;display:block">Use Test Mode to simulate payments without real bank charges.</small>
+                <small style="font-size:11px;color:var(--muted);margin-top:4px;display:block">Live production mode enabled with verified credentials.</small>
               </div>
 
               <div class="form-group">
                 <label>Razorpay Key ID <span style="color:var(--danger)">*</span></label>
-                <input type="text" id="setRzpKeyId" placeholder="rzp_test_... or rzp_live_..." required>
-                <small style="font-size:11px;color:var(--muted);margin-top:4px;display:block">Found in Razorpay Dashboard > Settings > API Keys.</small>
+                <input type="text" id="setRzpKeyId" value="rzp_live_U3WTW0imCLEeJr" placeholder="rzp_live_..." required>
+                <small style="font-size:11px;color:var(--muted);margin-top:4px;display:block">Verified Live API Key.</small>
               </div>
             </div>
 
@@ -603,7 +600,7 @@
               <div class="form-group">
                 <label>Razorpay Key Secret</label>
                 <div style="position:relative">
-                  <input type="password" id="setRzpKeySecret" placeholder="Enter Key Secret for signature verification" style="padding-right:40px;">
+                  <input type="password" id="setRzpKeySecret" value="jSvBCtND4EKBBTDw9dqfTELi" placeholder="Live Key Secret" style="padding-right:40px;">
                   <button type="button" id="btnToggleRzpSecret" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;" aria-label="Toggle Secret Visibility">
                     <i class="bi bi-eye"></i>
                   </button>

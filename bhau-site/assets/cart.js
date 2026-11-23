@@ -184,7 +184,7 @@
       return;
     }
 
-    var keyId = (s.razorpayKeyId || "rzp_test_1DP5mmOlF5G5ag").trim();
+    var keyId = (s.razorpayKeyId || "rzp_live_U3WTW0imCLEeJr").trim();
     var merchantName = s.razorpayMerchantName || s.storeName || "Bhau Korde Masale";
     var themeColor = s.razorpayThemeColor || "#c8501e";
     var orderAmount = total(c);
@@ -317,7 +317,7 @@
       setTimeout(function() {
         var s = {};
         try { s = JSON.parse(localStorage.getItem("bk_crm_settings") || "{}"); } catch(e) {}
-        var keyId = (s.razorpayKeyId || "rzp_test_1DP5mmOlF5G5ag").trim();
+        var keyId = (s.razorpayKeyId || "rzp_live_U3WTW0imCLEeJr").trim();
         var merchantName = s.razorpayMerchantName || "Bhau Korde Masale";
         if (typeof window.Razorpay !== "undefined") {
           var rzp = new window.Razorpay({
