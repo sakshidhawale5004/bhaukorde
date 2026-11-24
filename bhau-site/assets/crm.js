@@ -895,7 +895,7 @@
     }
   }
 
-  // Navigation Tabs
+  // Navigation Tabs & Sidebar Drawer
   function initTabs() {
     const tabBtns = document.querySelectorAll("[data-crm-tab]");
     tabBtns.forEach((btn) => {
@@ -904,6 +904,31 @@
         switchTab(tab);
       });
     });
+
+    // Mobile Sidebar Drawer Toggle & Backdrop
+    const sidebarToggle = document.getElementById("crmSidebarToggle");
+    const sidebarClose = document.getElementById("crmSidebarClose");
+    const backdrop = document.getElementById("crmSidebarBackdrop");
+    const sidebar = document.getElementById("crmSidebar");
+
+    if (sidebarToggle && sidebar && backdrop) {
+      sidebarToggle.addEventListener("click", () => {
+        sidebar.classList.add("open");
+        backdrop.classList.add("active");
+      });
+    }
+    if (sidebarClose && sidebar && backdrop) {
+      sidebarClose.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        backdrop.classList.remove("active");
+      });
+    }
+    if (backdrop && sidebar) {
+      backdrop.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        backdrop.classList.remove("active");
+      });
+    }
   }
 
   function switchTab(tabName) {
@@ -914,6 +939,34 @@
     document.querySelectorAll(".crm-view").forEach((view) => {
       view.classList.toggle("active", view.id === `view-${tabName}`);
     });
+
+    // Update Topbar View Title
+    const titleMap = {
+      overview: "Dashboard",
+      marketing: "Marketing & Campaigns",
+      products: "Products & Services",
+      customers: "Customers Management",
+      orders: "Orders Management",
+      appointments: "Appointments & Consultations",
+      reports: "Reports & Financial Audit",
+      payments: "Payments & Gateway",
+      shipping: "Shipping & Logistics",
+      inventory: "Inventory Management",
+      returns: "Returns & Refunds",
+      notifications: "Notifications Hub",
+      support: "Customer Support & Reviews",
+      testing: "Commerce Test Scenarios",
+      settings: "Settings & Access Control"
+    };
+    const titleEl = document.getElementById("crmCurrentViewTitle");
+    if (titleEl) titleEl.textContent = titleMap[tabName] || tabName;
+
+    // Close mobile drawer on item click
+    const sidebar = document.getElementById("crmSidebar");
+    const backdrop = document.getElementById("crmSidebarBackdrop");
+    if (sidebar) sidebar.classList.remove("open");
+    if (backdrop) backdrop.classList.remove("active");
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 

@@ -115,100 +115,149 @@
        ========================================================================== -->
   <div class="crm-layout">
 
-    <!-- Top CRM App Bar -->
-    <header class="crm-topbar">
-      <div class="crm-topbar-inner">
-        
-        <!-- Brand Identity -->
-        <div class="crm-brand">
-          <a href="../index.html" target="_blank" title="Bhau Korde Masale Home">
-            <img src="../LOGO-English.png" alt="Bhau Korde Masale" class="crm-brand-logo-img">
-          </a>
+    <!-- Mobile Backdrop Overlay -->
+    <div id="crmSidebarBackdrop" class="crm-sidebar-backdrop"></div>
+
+    <!-- ======================================================================
+         LEFT NAVIGATION SIDEBAR
+         ====================================================================== -->
+    <aside class="crm-sidebar" id="crmSidebar">
+      <!-- Sidebar Brand Identity Header -->
+      <div class="crm-sidebar-brand">
+        <a href="../index.html" target="_blank" title="Bhau Korde Masale Home" class="crm-brand-link">
+          <img src="../LOGO-English.png" alt="Bhau Korde Masale" class="crm-brand-logo-img">
           <div class="crm-brand-info">
-            <div class="crm-brand-title">BHAU KORDE MASALE</div>
+            <div class="crm-brand-title">BHAU KORDE</div>
             <div class="crm-brand-sub">
-              <span class="live-pulse"></span> Commerce Admin Hub
+              <span class="live-pulse"></span> Commerce Hub
             </div>
           </div>
+        </a>
+        <button type="button" class="crm-sidebar-close" id="crmSidebarClose" aria-label="Close Navigation Menu">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Navigation Tabs (Vertical Left Menu) -->
+      <nav class="crm-sidebar-nav" role="tablist">
+        <div class="nav-section-title">Main Menu</div>
+        <button type="button" class="tab-btn active" data-crm-tab="overview">
+          <span class="tab-btn-content"><i class="bi bi-speedometer2"></i> <span>Dashboard</span></span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="marketing">
+          <span class="tab-btn-content"><i class="bi bi-megaphone"></i> <span>Marketing</span></span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="products">
+          <span class="tab-btn-content"><i class="bi bi-box-seam"></i> <span>Products & services</span></span>
+          <span class="badge-pill" id="navCountProducts">31</span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="customers">
+          <span class="tab-btn-content"><i class="bi bi-people"></i> <span>Customers</span></span>
+          <span class="badge-pill" id="navCountCustomers">0</span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="orders">
+          <span class="tab-btn-content"><i class="bi bi-bag-check"></i> <span>Orders</span></span>
+          <span class="badge-pill" id="navCountOrders">0</span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="appointments">
+          <span class="tab-btn-content"><i class="bi bi-calendar-check"></i> <span>Appointments</span></span>
+          <span class="badge-pill" id="navCountAppointments">0</span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="reports">
+          <span class="tab-btn-content"><i class="bi bi-bar-chart-line"></i> <span>Reports & Audit</span></span>
+        </button>
+
+        <div class="nav-section-title">Commerce Operations</div>
+        <button type="button" class="tab-btn" data-crm-tab="payments">
+          <span class="tab-btn-content"><i class="bi bi-credit-card-2-front"></i> <span>Payments & Gateway</span></span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="shipping">
+          <span class="tab-btn-content"><i class="bi bi-truck"></i> <span>Shipping & Logistics</span></span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="inventory">
+          <span class="tab-btn-content"><i class="bi bi-boxes"></i> <span>Inventory</span></span>
+          <span id="navCountLowStock" class="badge-pill badge-danger" style="display:none;">!</span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="returns">
+          <span class="tab-btn-content"><i class="bi bi-arrow-return-left"></i> <span>Returns & Refunds</span></span>
+          <span class="badge-pill" id="navCountReturns">0</span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="notifications">
+          <span class="tab-btn-content"><i class="bi bi-bell"></i> <span>Notifications Hub</span></span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="support">
+          <span class="tab-btn-content"><i class="bi bi-headset"></i> <span>Support & Reviews</span></span>
+          <span class="badge-pill" id="navCountTickets">0</span>
+        </button>
+
+        <div class="nav-section-title">System & Diagnostics</div>
+        <button type="button" class="tab-btn tab-btn-highlight" data-crm-tab="testing">
+          <span class="tab-btn-content"><i class="bi bi-play-circle-fill" style="color:var(--gold)"></i> <span>Test Scenarios</span></span>
+          <span class="badge-pill" id="navCountTests">11/11</span>
+        </button>
+        <button type="button" class="tab-btn" data-crm-tab="settings">
+          <span class="tab-btn-content"><i class="bi bi-gear"></i> <span>Settings & Roles</span></span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Footer (Staff User & Actions) -->
+      <div class="crm-sidebar-footer">
+        <div class="staff-pill">
+          <div class="staff-avatar">A</div>
+          <div class="staff-meta">
+            <span class="staff-name">Staff Admin</span>
+            <span class="staff-role">Super Admin</span>
+          </div>
         </div>
-
-        <!-- CRM Navigation Tabs -->
-        <nav class="crm-nav-tabs" role="tablist">
-          <button type="button" class="tab-btn active" data-crm-tab="overview">
-            <i class="bi bi-speedometer2"></i> Dashboard
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="marketing">
-            <i class="bi bi-megaphone"></i> Marketing
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="products">
-            <i class="bi bi-box-seam"></i> Products & services (<span id="navCountProducts">31</span>)
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="customers">
-            <i class="bi bi-people"></i> Customers (<span id="navCountCustomers">0</span>)
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="orders">
-            <i class="bi bi-bag-check"></i> Orders (<span id="navCountOrders">0</span>)
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="appointments">
-            <i class="bi bi-calendar-check"></i> Appointments (<span id="navCountAppointments">0</span>)
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="reports">
-            <i class="bi bi-bar-chart-line"></i> Reports & Audit
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="payments">
-            <i class="bi bi-credit-card-2-front"></i> Payments & Gateway
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="shipping">
-            <i class="bi bi-truck"></i> Shipping & Logistics
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="inventory">
-            <i class="bi bi-boxes"></i> Inventory <span id="navCountLowStock" class="badge-pill" style="display:none;background:#dc2626;color:#fff;">!</span>
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="returns">
-            <i class="bi bi-arrow-return-left"></i> Returns & Refunds (<span id="navCountReturns">0</span>)
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="notifications">
-            <i class="bi bi-bell"></i> Notifications Hub
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="support">
-            <i class="bi bi-headset"></i> Support & Reviews (<span id="navCountTickets">0</span>)
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="testing" style="background:rgba(212,149,44,0.15);border:1px solid rgba(212,149,44,0.35);color:var(--fg);">
-            <i class="bi bi-play-circle-fill" style="color:var(--gold)"></i> Test Scenarios (<span id="navCountTests">11/11</span>)
-          </button>
-          <button type="button" class="tab-btn" data-crm-tab="settings">
-            <i class="bi bi-gear"></i> Settings & Roles
-          </button>
-        </nav>
-
-        <!-- User Controls & Storefront Quick Access -->
-        <div class="crm-controls">
+        <div class="sidebar-action-row">
           <a href="../index.html" target="_blank" class="store-link-btn" title="Open Storefront in New Tab">
             <i class="bi bi-shop"></i> Storefront <i class="bi bi-arrow-up-right"></i>
           </a>
-
           <button type="button" id="themeToggleBtn" class="icon-btn" title="Toggle Dark / Light Theme" aria-label="Toggle Theme">
             <i class="bi bi-moon-stars-fill"></i>
           </button>
-
-          <div class="staff-pill">
-            <div class="staff-avatar">A</div>
-            <div class="staff-meta">
-              <span class="staff-name">Staff Admin</span>
-              <span class="staff-role">Super Admin</span>
-            </div>
-          </div>
-
           <button type="button" id="crmLogoutBtn" class="icon-btn" title="Sign Out of CRM" aria-label="Sign Out">
             <i class="bi bi-box-arrow-right"></i>
           </button>
         </div>
-
       </div>
-    </header>
+    </aside>
 
-    <!-- Main Content Body -->
-    <main class="crm-main">
+    <!-- ======================================================================
+         MAIN CONTENT AREA WRAPPER
+         ====================================================================== -->
+    <div class="crm-content-wrapper">
+
+      <!-- Top Header / Breadcrumb Bar -->
+      <header class="crm-topbar">
+        <div class="crm-topbar-inner">
+          <div class="crm-topbar-left">
+            <button type="button" class="crm-menu-toggle" id="crmSidebarToggle" aria-label="Open Sidebar Menu">
+              <i class="bi bi-list"></i>
+            </button>
+            <div class="crm-topbar-breadcrumb">
+              <span class="crumb-lead">Admin Hub</span>
+              <i class="bi bi-chevron-right crumb-sep"></i>
+              <span class="crumb-active" id="crmCurrentViewTitle">Dashboard</span>
+            </div>
+          </div>
+
+          <div class="crm-controls">
+            <a href="../index.html" target="_blank" class="store-link-btn" title="Open Storefront in New Tab">
+              <i class="bi bi-shop"></i> Storefront <i class="bi bi-arrow-up-right"></i>
+            </a>
+            <button type="button" class="icon-btn" onclick="document.getElementById('themeToggleBtn').click()" title="Toggle Theme" aria-label="Toggle Theme">
+              <i class="bi bi-moon-stars-fill"></i>
+            </button>
+            <button type="button" class="icon-btn" onclick="document.getElementById('crmLogoutBtn').click()" title="Sign Out of CRM" aria-label="Sign Out">
+              <i class="bi bi-box-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Body -->
+      <main class="crm-main">
 
       <!-- ======================================================================
            VIEW 1: OVERVIEW / DASHBOARD
@@ -1425,7 +1474,8 @@
       </section>
 
     </main>
-  </div>
+    </div> <!-- /.crm-content-wrapper -->
+  </div> <!-- /.crm-layout -->
 
   <!-- ==========================================================================
        MODALS
