@@ -947,7 +947,6 @@
       products: "Products & Services",
       customers: "Customers Management",
       orders: "Orders Management",
-      appointments: "Appointments & Consultations",
       reports: "Reports & Financial Audit",
       payments: "Payments & Gateway",
       shipping: "Shipping & Logistics",
@@ -989,12 +988,6 @@
 
     const tCount = document.getElementById("navCountTickets");
     if (tCount) tCount.textContent = state.tickets.filter(t => t.status !== "Closed").length;
-
-    const aptCount = document.getElementById("navCountAppointments");
-    if (aptCount) {
-      const activeApts = state.appointments.filter(a => a.status === "Confirmed" || a.status === "Pending").length;
-      aptCount.textContent = activeApts;
-    }
 
     const lowStockCount = state.products.filter(p => p.status === "low-stock" || (typeof p.stock === "number" && p.stock <= 15)).length;
     const lowBadge = document.getElementById("navCountLowStock");
@@ -2475,187 +2468,14 @@
   }
 
   // ==========================================================================
-  // MODULE: APPOINTMENTS & CONSULTATIONS
+  // MODULE: APPOINTMENTS (Removed per user request)
   // ==========================================================================
-  function renderAppointments() {
-    const searchVal = (state.search.appointments || "").toLowerCase();
-    const filterStatus = state.filters.appointmentStatus || "all";
-
-    const filtered = state.appointments.filter(a => {
-      const matchSearch = !searchVal || 
-        (a.id && a.id.toLowerCase().includes(searchVal)) ||
-        (a.customer && a.customer.toLowerCase().includes(searchVal)) ||
-        (a.phone && a.phone.toLowerCase().includes(searchVal)) ||
-        (a.purpose && a.purpose.toLowerCase().includes(searchVal)) ||
-        (a.location && a.location.toLowerCase().includes(searchVal));
-      
-      const matchStatus = filterStatus === "all" || a.status === filterStatus;
-      return matchSearch && matchStatus;
-    });
-
-    // KPI Cards
-    const elTotal = document.getElementById("aptKpiTotal");
-    if (elTotal) elTotal.textContent = state.appointments.length;
-
-    const elUpcoming = document.getElementById("aptKpiUpcoming");
-    if (elUpcoming) elUpcoming.textContent = state.appointments.filter(a => a.status === "Confirmed").length;
-
-    const elPending = document.getElementById("aptKpiPending");
-    if (elPending) elPending.textContent = state.appointments.filter(a => a.status === "Pending").length;
-
-    const elCompleted = document.getElementById("aptKpiCompleted");
-    if (elCompleted) elCompleted.textContent = state.appointments.filter(a => a.status === "Completed").length;
-
-    // Render Table
-    const tbody = document.getElementById("appointmentsTableBody");
-    if (tbody) {
-      if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">No appointments matching the selected filter. Click "Schedule Appointment" to book a consultation.</td></tr>`;
-      } else {
-        tbody.innerHTML = filtered.map(apt => {
-          const statusClass = (apt.status || "Pending").toLowerCase();
-          const badgeIcon = apt.status === "Confirmed" ? "bi-check2-circle" : apt.status === "Pending" ? "bi-clock-history" : apt.status === "Completed" ? "bi-award-fill" : "bi-x-circle";
-          return `
-            <tr>
-              <td><b style="font-family:monospace">${esc(apt.id)}</b></td>
-              <td>
-                <b style="font-size:13.5px">${esc(apt.customer)}</b>
-                ${apt.notes ? `<div style="font-size:11.5px;color:var(--muted);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(apt.notes)}">${esc(apt.notes)}</div>` : ''}
-              </td>
-              <td>
-                <a href="tel:${esc(apt.phone)}" style="color:var(--accent);text-decoration:none;font-weight:500;">
-                  <i class="bi bi-telephone"></i> ${esc(apt.phone)}
-                </a>
-                ${apt.email ? `<div style="font-size:11px;color:var(--muted);">${esc(apt.email)}</div>` : ''}
-              </td>
-              <td>
-                <span class="apt-purpose-badge">
-                  <i class="bi bi-cup-hot" style="color:var(--accent)"></i> ${esc(apt.purpose)}
-                </span>
-              </td>
-              <td>
-                <div style="font-weight:600;font-size:13px">${esc(apt.date)}</div>
-                <div style="font-size:11.5px;color:var(--muted);"><i class="bi bi-clock"></i> ${esc(apt.time)}</div>
-              </td>
-              <td><small>${esc(apt.location)}</small></td>
-              <td>
-                <span class="apt-status-badge ${statusClass}">
-                  <i class="bi ${badgeIcon}"></i> ${esc(apt.status)}
-                </span>
-              </td>
-              <td>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  <button type="button" class="btn-outline" style="font-size:11px;padding:4px 8px;background:rgba(37,211,102,0.08);color:#16a34a;border-color:rgba(37,211,102,0.3)" onclick="window.BK_CRM.sendAppointmentWhatsApp('${esc(apt.id)}')" title="Send WhatsApp Confirmation">
-                    <i class="bi bi-whatsapp"></i>
-                  </button>
-                  <select style="font-size:11.5px;padding:3px 6px;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--surface);" onchange="window.BK_CRM.updateAppointmentStatus('${esc(apt.id)}', this.value)">
-                    <option value="Confirmed" ${apt.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                    <option value="Pending" ${apt.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                    <option value="Completed" ${apt.status === 'Completed' ? 'selected' : ''}>Completed</option>
-                    <option value="Cancelled" ${apt.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                  </select>
-                  <button type="button" class="btn-outline" style="font-size:11px;padding:4px 8px;color:var(--danger);border-color:var(--danger-border)" onclick="window.BK_CRM.deleteAppointment('${esc(apt.id)}')" title="Delete Booking">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          `;
-        }).join("");
-      }
-    }
-  }
-
-  function openScheduleAppointmentModal() {
-    const m = document.getElementById("modalAppointment");
-    if (m) {
-      document.getElementById("appointmentForm").reset();
-      const nextId = "APT-2026-" + (state.appointments.length + 101);
-      document.getElementById("aptFormId").value = nextId;
-      const today = new Date().toISOString().split("T")[0];
-      const dInput = document.getElementById("aptFormDate");
-      if (dInput) dInput.value = today;
-      m.classList.add("active");
-    }
-  }
-
-  function saveAppointment(e) {
-    if (e) e.preventDefault();
-    const id = document.getElementById("aptFormId").value || ("APT-2026-" + Date.now().toString().slice(-4));
-    const customer = document.getElementById("aptFormCustomer").value.trim();
-    const phone = document.getElementById("aptFormPhone").value.trim();
-    const email = document.getElementById("aptFormEmail").value.trim();
-    const purpose = document.getElementById("aptFormPurpose").value;
-    const date = document.getElementById("aptFormDate").value;
-    const time = document.getElementById("aptFormTime").value.trim();
-    const location = document.getElementById("aptFormLocation").value.trim();
-    const status = document.getElementById("aptFormStatus").value;
-    const notes = document.getElementById("aptFormNotes").value.trim();
-
-    if (!customer || !phone || !date || !time) {
-      toast("Please complete all required appointment fields.", "error");
-      return;
-    }
-
-    const aptObj = {
-      id,
-      customer,
-      phone,
-      email,
-      purpose,
-      date,
-      time,
-      location,
-      status,
-      notes,
-      createdAt: formatDate(new Date())
-    };
-
-    const existingIdx = state.appointments.findIndex(a => a.id === id);
-    if (existingIdx >= 0) {
-      state.appointments[existingIdx] = aptObj;
-      toast(`Appointment ${id} updated.`);
-    } else {
-      state.appointments.unshift(aptObj);
-      toast(`Appointment scheduled for ${customer}!`);
-    }
-
-    saveData(STORAGE.APPOINTMENTS, state.appointments);
-    renderAppointments();
-    updateNavBadges();
-    const m = document.getElementById("modalAppointment");
-    if (m) m.classList.remove("active");
-  }
-
-  function updateAppointmentStatus(aptId, newStatus) {
-    const apt = state.appointments.find(a => a.id === aptId);
-    if (apt) {
-      apt.status = newStatus;
-      saveData(STORAGE.APPOINTMENTS, state.appointments);
-      renderAppointments();
-      updateNavBadges();
-      toast(`Appointment ${aptId} status changed to ${newStatus}.`);
-    }
-  }
-
-  function sendAppointmentWhatsApp(aptId) {
-    const apt = state.appointments.find(a => a.id === aptId);
-    if (!apt) return;
-    const cleanPhone = (apt.phone || "").replace(/[^0-9]/g, "");
-    const msg = `Namaste ${apt.customer}! 🌿\n\nYour consultation with *Bhau Korde Masale* is confirmed:\n*Booking ID:* ${apt.id}\n*Purpose:* ${apt.purpose}\n*Date & Time:* ${apt.date} at ${apt.time}\n*Location:* ${apt.location}\n\nWe look forward to sharing our pure handcrafted spice traditions with you!\n_चवीने खाणार त्याला भाऊ देणार._`;
-    const url = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-    window.open(url, "_blank");
-    toast(`WhatsApp confirmation opened for ${apt.customer}!`);
-  }
-
-  function deleteAppointment(aptId) {
-    if (!confirm(`Are you sure you want to delete appointment booking "${aptId}"?`)) return;
-    state.appointments = state.appointments.filter(a => a.id !== aptId);
-    saveData(STORAGE.APPOINTMENTS, state.appointments);
-    renderAppointments();
-    updateNavBadges();
-    toast(`Appointment ${aptId} deleted.`);
-  }
+  function renderAppointments() {}
+  function openScheduleAppointmentModal() {}
+  function saveAppointment(e) { if (e) e.preventDefault(); }
+  function updateAppointmentStatus() {}
+  function sendAppointmentWhatsApp() {}
+  function deleteAppointment() {}
 
   // Master Render
   function renderAll() {

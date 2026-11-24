@@ -159,10 +159,6 @@
           <span class="tab-btn-content"><i class="bi bi-bag-check"></i> <span>Orders</span></span>
           <span class="badge-pill" id="navCountOrders">0</span>
         </button>
-        <button type="button" class="tab-btn" data-crm-tab="appointments">
-          <span class="tab-btn-content"><i class="bi bi-calendar-check"></i> <span>Appointments</span></span>
-          <span class="badge-pill" id="navCountAppointments">0</span>
-        </button>
         <button type="button" class="tab-btn" data-crm-tab="reports">
           <span class="tab-btn-content"><i class="bi bi-bar-chart-line"></i> <span>Reports & Audit</span></span>
         </button>
@@ -518,74 +514,6 @@
         </div>
       </section>
 
-      <!-- ======================================================================
-           VIEW: APPOINTMENTS & CONSULTATIONS
-           ====================================================================== -->
-      <section id="view-appointments" class="crm-view">
-        <div class="recon-grid" style="margin-bottom:20px;">
-          <div class="recon-stat-card">
-            <div class="recon-stat-title">Total Bookings</div>
-            <div class="recon-stat-val" id="aptKpiTotal">0</div>
-            <div class="recon-stat-sub">Consultations & Tastings</div>
-          </div>
-          <div class="recon-stat-card">
-            <div class="recon-stat-title">Upcoming / Confirmed</div>
-            <div class="recon-stat-val" id="aptKpiUpcoming" style="color:var(--success);">0</div>
-            <div class="recon-stat-sub">Confirmed appointments</div>
-          </div>
-          <div class="recon-stat-card">
-            <div class="recon-stat-title">Pending Confirmation</div>
-            <div class="recon-stat-val" id="aptKpiPending" style="color:var(--warning);">0</div>
-            <div class="recon-stat-sub">Requires staff follow-up</div>
-          </div>
-          <div class="recon-stat-card">
-            <div class="recon-stat-title">Completed Visits</div>
-            <div class="recon-stat-val" id="aptKpiCompleted" style="color:var(--info);">0</div>
-            <div class="recon-stat-sub">Conducted spice sessions</div>
-          </div>
-        </div>
-
-        <div class="table-toolbar">
-          <div class="toolbar-left">
-            <div class="search-box">
-              <i class="bi bi-search"></i>
-              <input type="text" id="searchAppointmentsInput" placeholder="Search by client, phone, or appointment purpose...">
-            </div>
-
-            <select id="filterAppointmentStatus" class="filter-select">
-              <option value="all">All Statuses</option>
-              <option value="Confirmed">Confirmed</option>
-              <option value="Pending">Pending</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-          </div>
-
-          <div class="toolbar-right">
-            <button type="button" class="btn-primary" onclick="window.BK_CRM.openScheduleAppointmentModal()">
-              <i class="bi bi-calendar-plus"></i> Schedule Appointment
-            </button>
-          </div>
-        </div>
-
-        <div class="table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Booking ID</th>
-                <th>Client / Business</th>
-                <th>Contact</th>
-                <th>Purpose / Session</th>
-                <th>Date & Time</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="appointmentsTableBody"></tbody>
-          </table>
-        </div>
-      </section>
 
       <!-- ======================================================================
            VIEW 3: PAYMENT VERIFICATION & GATEWAY RECONCILIATION
@@ -1675,79 +1603,6 @@
     </div>
   </div>
 
-  <!-- MODAL: SCHEDULE APPOINTMENT -->
-  <div id="modalAppointment" class="modal-overlay">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3 class="modal-title">
-          <i class="bi bi-calendar-event" style="color:var(--accent)"></i> Schedule Consultation / Appointment
-        </h3>
-        <button type="button" class="modal-close" data-close-modal>&times;</button>
-      </div>
-      <form id="appointmentForm" class="modal-body" onsubmit="window.BK_CRM.saveAppointment(event)">
-        <input type="hidden" id="aptFormId">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Client / Business Name *</label>
-            <input type="text" id="aptFormCustomer" placeholder="e.g. Sunil Kadam (Kadam Caterers)" required>
-          </div>
-          <div class="form-group">
-            <label>Contact Phone (WhatsApp) *</label>
-            <input type="tel" id="aptFormPhone" placeholder="+91 98200 12345" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" id="aptFormEmail" placeholder="client@example.com">
-          </div>
-          <div class="form-group">
-            <label>Consultation Purpose *</label>
-            <select id="aptFormPurpose" required>
-              <option value="Bulk Catering Spice Tasting">Bulk Catering Spice Tasting</option>
-              <option value="Custom Masala Formulation">Custom Masala Formulation (Hotels & Restaurants)</option>
-              <option value="Panvel Spice Mill & Store Visit">Panvel Spice Mill & Store Visit</option>
-              <option value="Wholesale Distribution Partnership">Wholesale Distribution Partnership</option>
-              <option value="Kitchen Refill Consultation">Kitchen Refill Consultation</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Appointment Date *</label>
-            <input type="date" id="aptFormDate" required>
-          </div>
-          <div class="form-group">
-            <label>Time Slot *</label>
-            <input type="text" id="aptFormTime" placeholder="e.g. 11:30 AM" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Location / Venue *</label>
-            <input type="text" id="aptFormLocation" value="Panvel Spice Mill & Tasting Room" required>
-          </div>
-          <div class="form-group">
-            <label>Status *</label>
-            <select id="aptFormStatus" required>
-              <option value="Confirmed">Confirmed</option>
-              <option value="Pending">Pending</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Consultation Notes / Spice Requirements</label>
-          <textarea id="aptFormNotes" rows="3" placeholder="Order quantity, sample curry tasting preferences, spice blends of interest..."></textarea>
-        </div>
-        <div class="modal-footer" style="padding:16px 0 0;margin-top:16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;">
-          <button type="button" class="btn-outline" data-close-modal>Cancel</button>
-          <button type="submit" class="btn-primary"><i class="bi bi-calendar-check"></i> Save Appointment</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- MODAL: CREATE PROMO COUPON -->
   <div id="modalCoupon" class="modal-overlay">
