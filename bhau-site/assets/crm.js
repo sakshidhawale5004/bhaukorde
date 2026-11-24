@@ -615,139 +615,9 @@
     }
   };
 
-  const DEFAULT_APPOINTMENTS = [
-    {
-      id: "APT-2026-101",
-      customer: "Sunil Kadam (Kadam Caterers)",
-      phone: "+91 98201 54321",
-      email: "kadam.caterers@gmail.com",
-      purpose: "Bulk Catering Spice Tasting",
-      date: "2026-11-26",
-      time: "11:30 AM",
-      location: "Panvel Spice Mill & Tasting Room",
-      status: "Confirmed",
-      notes: "Wedding banquet order requirement (150 kg Malvani & Sunday Masala). Wants sample curries tasting.",
-      createdAt: "2026-11-23 14:15"
-    },
-    {
-      id: "APT-2026-102",
-      customer: "Chef Vikram Thorat (Hotel Konkan Swad)",
-      phone: "+91 97690 12345",
-      email: "konkanswad.panvel@gmail.com",
-      purpose: "Custom Masala Formulation",
-      date: "2026-11-27",
-      time: "03:00 PM",
-      location: "Hotel Konkan Swad, Old Panvel",
-      status: "Confirmed",
-      notes: "Custom roasted ratio formulation for signature Fish Thali and Bramhni Goda mutton gravy.",
-      createdAt: "2026-11-24 09:30"
-    },
-    {
-      id: "APT-2026-103",
-      customer: "Anand Mhatre (Mhatre Provision Stores)",
-      phone: "+91 98334 77889",
-      email: "mhatre.retail@outlook.com",
-      purpose: "Wholesale Distribution Partnership",
-      date: "2026-11-28",
-      time: "01:00 PM",
-      location: "Panvel Head Office",
-      status: "Pending",
-      notes: "Distributor shelf display inquiry for 12 retail outlets in Uran and Alibaug.",
-      createdAt: "2026-11-24 10:45"
-    },
-    {
-      id: "APT-2026-104",
-      customer: "Mrs. Meena Joshi",
-      phone: "+91 99200 44556",
-      email: "meena.joshi77@gmail.com",
-      purpose: "Store Visit & Pickle Booking",
-      date: "2026-11-25",
-      time: "04:30 PM",
-      location: "Bhau Korde Retail Outlet, Panvel",
-      status: "Completed",
-      notes: "Annual bulk booking for Aamba Lonche and Special Bramhni Kala Masala (5 kg).",
-      createdAt: "2026-11-22 16:00"
-    }
-  ];
-
-  const DEFAULT_COUPONS = [
-    {
-      code: "BHAU10",
-      description: "10% off for first-time store shoppers",
-      discountType: "percentage",
-      discountValue: 10,
-      minOrder: 400,
-      timesRedeemed: 142,
-      expiryDate: "2026-12-31",
-      active: true
-    },
-    {
-      code: "DIWALI50",
-      description: "Flat ₹50 festive celebration discount on orders above ₹500",
-      discountType: "fixed",
-      discountValue: 50,
-      minOrder: 500,
-      timesRedeemed: 89,
-      expiryDate: "2026-12-15",
-      active: true
-    },
-    {
-      code: "FREESHIP",
-      description: "Free door delivery anywhere in Navi Mumbai & Mumbai MMR",
-      discountType: "fixed",
-      discountValue: 50,
-      minOrder: 350,
-      timesRedeemed: 215,
-      expiryDate: "2026-12-31",
-      active: true
-    },
-    {
-      code: "KONKAN20",
-      description: "20% off on all coastal Malvani & Fish masalas",
-      discountType: "percentage",
-      discountValue: 20,
-      minOrder: 600,
-      timesRedeemed: 64,
-      expiryDate: "2026-11-30",
-      active: true
-    }
-  ];
-
-  const DEFAULT_CAMPAIGNS = [
-    {
-      id: "CMP-01",
-      title: "🌶️ Authentic Malvani Feast Weekend Special",
-      target: "All Konkan Cuisine Patrons",
-      channel: "WhatsApp Broadcast",
-      message: "Namaste! 🌿 Make authentic coastal curries this weekend with Bhau Korde Special Malvani Masala & Sagar Ratna Fish Masala. Enjoy 15% off with code KONKAN20!\n👉 Order fresh: https://bhaukorde.in/blended-spices.html\n_चवीने खाणार त्याला भाऊ देणार._",
-      sentDate: "2026-11-22",
-      reach: 520,
-      clicks: 184,
-      orders: 38
-    },
-    {
-      id: "CMP-02",
-      title: "🥭 Grandma's Recipe Handcrafted Mango Pickle Launch",
-      target: "Pickle & Chutney Lovers",
-      channel: "WhatsApp & SMS",
-      message: "Namaste! 🌿 Our famous Aamba Lonche (Grandma's recipe) has arrived fresh from Panvel! Handpicked raw mangoes in cold-pressed mustard oil.\n👉 Book jar now: https://bhaukorde.in/pickle.html\nBhau Korde Masale",
-      sentDate: "2026-11-20",
-      reach: 680,
-      clicks: 290,
-      orders: 74
-    },
-    {
-      id: "CMP-03",
-      title: "🎁 Patron Loyalty Re-order Discount (Flat ₹50 Off)",
-      target: "Patrons with No Orders in 30 Days",
-      channel: "WhatsApp Direct",
-      message: "Namaste! 🌿 We miss you at Bhau Korde Masale! Use exclusive code BHAU50 for ₹50 off on your kitchen spice refill.\n👉 Shop now: https://bhaukorde.in/cart.html",
-      sentDate: "2026-11-18",
-      reach: 340,
-      clicks: 110,
-      orders: 26
-    }
-  ];
+  const DEFAULT_APPOINTMENTS = [];
+  const DEFAULT_COUPONS = [];
+  const DEFAULT_CAMPAIGNS = [];
 
   // Central State
   const state = {
@@ -868,9 +738,28 @@
     try { state.testMatrix = JSON.parse(localStorage.getItem(STORAGE.TEST_MATRIX)) || DEFAULT_TEST_MATRIX; } catch (e) { state.testMatrix = DEFAULT_TEST_MATRIX; }
     try { state.currentRole = localStorage.getItem(STORAGE.ROLE) || "Super Admin"; } catch (e) { state.currentRole = "Super Admin"; }
 
-    try { state.appointments = JSON.parse(localStorage.getItem(STORAGE.APPOINTMENTS)) || DEFAULT_APPOINTMENTS; } catch (e) { state.appointments = DEFAULT_APPOINTMENTS; }
-    try { state.coupons = JSON.parse(localStorage.getItem(STORAGE.COUPONS)) || DEFAULT_COUPONS; } catch (e) { state.coupons = DEFAULT_COUPONS; }
-    try { state.campaigns = JSON.parse(localStorage.getItem(STORAGE.CAMPAIGNS)) || DEFAULT_CAMPAIGNS; } catch (e) { state.campaigns = DEFAULT_CAMPAIGNS; }
+    try { state.appointments = JSON.parse(localStorage.getItem(STORAGE.APPOINTMENTS)) || []; } catch (e) { state.appointments = []; }
+    try { state.coupons = JSON.parse(localStorage.getItem(STORAGE.COUPONS)) || []; } catch (e) { state.coupons = []; }
+    try { state.campaigns = JSON.parse(localStorage.getItem(STORAGE.CAMPAIGNS)) || []; } catch (e) { state.campaigns = []; }
+
+    // Purge any legacy default seed items from localStorage so the CRM starts completely clean
+    const seedAptIds = new Set(["APT-2026-101", "APT-2026-102", "APT-2026-103", "APT-2026-104"]);
+    if (state.appointments.some(a => seedAptIds.has(a.id))) {
+      state.appointments = state.appointments.filter(a => !seedAptIds.has(a.id));
+      saveData(STORAGE.APPOINTMENTS, state.appointments);
+    }
+
+    const seedCouponCodes = new Set(["BHAU10", "DIWALI50", "FREESHIP", "KONKAN20"]);
+    if (state.coupons.some(c => seedCouponCodes.has(c.code))) {
+      state.coupons = state.coupons.filter(c => !seedCouponCodes.has(c.code));
+      saveData(STORAGE.COUPONS, state.coupons);
+    }
+
+    const seedCampaignIds = new Set(["CMP-01", "CMP-02", "CMP-03"]);
+    if (state.campaigns.some(c => seedCampaignIds.has(c.id))) {
+      state.campaigns = state.campaigns.filter(c => !seedCampaignIds.has(c.id));
+      saveData(STORAGE.CAMPAIGNS, state.campaigns);
+    }
 
     // Check if optional untracked window.BHAU_CONFIG exists locally
     if (window.BHAU_CONFIG) {
@@ -892,9 +781,6 @@
     if (!localStorage.getItem(STORAGE.PRODUCTS)) saveData(STORAGE.PRODUCTS, state.products);
     if (!localStorage.getItem(STORAGE.SETTINGS)) saveData(STORAGE.SETTINGS, state.settings);
     if (!localStorage.getItem(STORAGE.TEST_MATRIX)) saveData(STORAGE.TEST_MATRIX, state.testMatrix);
-    if (!localStorage.getItem(STORAGE.APPOINTMENTS)) saveData(STORAGE.APPOINTMENTS, state.appointments);
-    if (!localStorage.getItem(STORAGE.COUPONS)) saveData(STORAGE.COUPONS, state.coupons);
-    if (!localStorage.getItem(STORAGE.CAMPAIGNS)) saveData(STORAGE.CAMPAIGNS, state.campaigns);
   }
 
   function saveData(key, val) {
