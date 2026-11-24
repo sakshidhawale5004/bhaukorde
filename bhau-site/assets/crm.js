@@ -21,7 +21,10 @@
     REVIEWS: "bk_crm_reviews",
     STOCK_LOG: "bk_crm_stock_log",
     TEST_MATRIX: "bk_crm_test_matrix",
-    ROLE: "bk_crm_role"
+    ROLE: "bk_crm_role",
+    APPOINTMENTS: "bk_crm_appointments",
+    COUPONS: "bk_crm_coupons",
+    CAMPAIGNS: "bk_crm_campaigns"
   };
 
   // Default Store Settings
@@ -36,11 +39,11 @@
     freeDeliveryThreshold: 500,
     shippingFee: 50,
     currencySymbol: "₹",
-    // Razorpay Payment Gateway Configuration (Live Production)
+    // Razorpay Payment Gateway Configuration (Saved securely in localStorage, never committed to GitHub)
     razorpayEnabled: true,
     razorpayMode: "live",
-    razorpayKeyId: "rzp_live_U3WTW0imCLEeJr",
-    razorpayKeySecret: "jSvBCtND4EKBBTDw9dqfTELi",
+    razorpayKeyId: "",
+    razorpayKeySecret: "",
     razorpayMerchantName: "Bhau Korde Masale",
     razorpayThemeColor: "#c8501e",
     razorpayChannels: ["upi", "cards", "netbanking"],
@@ -612,6 +615,140 @@
     }
   };
 
+  const DEFAULT_APPOINTMENTS = [
+    {
+      id: "APT-2026-101",
+      customer: "Sunil Kadam (Kadam Caterers)",
+      phone: "+91 98201 54321",
+      email: "kadam.caterers@gmail.com",
+      purpose: "Bulk Catering Spice Tasting",
+      date: "2026-11-26",
+      time: "11:30 AM",
+      location: "Panvel Spice Mill & Tasting Room",
+      status: "Confirmed",
+      notes: "Wedding banquet order requirement (150 kg Malvani & Sunday Masala). Wants sample curries tasting.",
+      createdAt: "2026-11-23 14:15"
+    },
+    {
+      id: "APT-2026-102",
+      customer: "Chef Vikram Thorat (Hotel Konkan Swad)",
+      phone: "+91 97690 12345",
+      email: "konkanswad.panvel@gmail.com",
+      purpose: "Custom Masala Formulation",
+      date: "2026-11-27",
+      time: "03:00 PM",
+      location: "Hotel Konkan Swad, Old Panvel",
+      status: "Confirmed",
+      notes: "Custom roasted ratio formulation for signature Fish Thali and Bramhni Goda mutton gravy.",
+      createdAt: "2026-11-24 09:30"
+    },
+    {
+      id: "APT-2026-103",
+      customer: "Anand Mhatre (Mhatre Provision Stores)",
+      phone: "+91 98334 77889",
+      email: "mhatre.retail@outlook.com",
+      purpose: "Wholesale Distribution Partnership",
+      date: "2026-11-28",
+      time: "01:00 PM",
+      location: "Panvel Head Office",
+      status: "Pending",
+      notes: "Distributor shelf display inquiry for 12 retail outlets in Uran and Alibaug.",
+      createdAt: "2026-11-24 10:45"
+    },
+    {
+      id: "APT-2026-104",
+      customer: "Mrs. Meena Joshi",
+      phone: "+91 99200 44556",
+      email: "meena.joshi77@gmail.com",
+      purpose: "Store Visit & Pickle Booking",
+      date: "2026-11-25",
+      time: "04:30 PM",
+      location: "Bhau Korde Retail Outlet, Panvel",
+      status: "Completed",
+      notes: "Annual bulk booking for Aamba Lonche and Special Bramhni Kala Masala (5 kg).",
+      createdAt: "2026-11-22 16:00"
+    }
+  ];
+
+  const DEFAULT_COUPONS = [
+    {
+      code: "BHAU10",
+      description: "10% off for first-time store shoppers",
+      discountType: "percentage",
+      discountValue: 10,
+      minOrder: 400,
+      timesRedeemed: 142,
+      expiryDate: "2026-12-31",
+      active: true
+    },
+    {
+      code: "DIWALI50",
+      description: "Flat ₹50 festive celebration discount on orders above ₹500",
+      discountType: "fixed",
+      discountValue: 50,
+      minOrder: 500,
+      timesRedeemed: 89,
+      expiryDate: "2026-12-15",
+      active: true
+    },
+    {
+      code: "FREESHIP",
+      description: "Free door delivery anywhere in Navi Mumbai & Mumbai MMR",
+      discountType: "fixed",
+      discountValue: 50,
+      minOrder: 350,
+      timesRedeemed: 215,
+      expiryDate: "2026-12-31",
+      active: true
+    },
+    {
+      code: "KONKAN20",
+      description: "20% off on all coastal Malvani & Fish masalas",
+      discountType: "percentage",
+      discountValue: 20,
+      minOrder: 600,
+      timesRedeemed: 64,
+      expiryDate: "2026-11-30",
+      active: true
+    }
+  ];
+
+  const DEFAULT_CAMPAIGNS = [
+    {
+      id: "CMP-01",
+      title: "🌶️ Authentic Malvani Feast Weekend Special",
+      target: "All Konkan Cuisine Patrons",
+      channel: "WhatsApp Broadcast",
+      message: "Namaste! 🌿 Make authentic coastal curries this weekend with Bhau Korde Special Malvani Masala & Sagar Ratna Fish Masala. Enjoy 15% off with code KONKAN20!\n👉 Order fresh: https://bhaukorde.in/blended-spices.html\n_चवीने खाणार त्याला भाऊ देणार._",
+      sentDate: "2026-11-22",
+      reach: 520,
+      clicks: 184,
+      orders: 38
+    },
+    {
+      id: "CMP-02",
+      title: "🥭 Grandma's Recipe Handcrafted Mango Pickle Launch",
+      target: "Pickle & Chutney Lovers",
+      channel: "WhatsApp & SMS",
+      message: "Namaste! 🌿 Our famous Aamba Lonche (Grandma's recipe) has arrived fresh from Panvel! Handpicked raw mangoes in cold-pressed mustard oil.\n👉 Book jar now: https://bhaukorde.in/pickle.html\nBhau Korde Masale",
+      sentDate: "2026-11-20",
+      reach: 680,
+      clicks: 290,
+      orders: 74
+    },
+    {
+      id: "CMP-03",
+      title: "🎁 Patron Loyalty Re-order Discount (Flat ₹50 Off)",
+      target: "Patrons with No Orders in 30 Days",
+      channel: "WhatsApp Direct",
+      message: "Namaste! 🌿 We miss you at Bhau Korde Masale! Use exclusive code BHAU50 for ₹50 off on your kitchen spice refill.\n👉 Shop now: https://bhaukorde.in/cart.html",
+      sentDate: "2026-11-18",
+      reach: 340,
+      clicks: 110,
+      orders: 26
+    }
+  ];
+
   // Central State
   const state = {
     products: [],
@@ -625,6 +762,10 @@
     reviews: [],
     stockLogs: [],
     testMatrix: {},
+    appointments: [],
+    coupons: [],
+    campaigns: [],
+    marketingSubTab: "coupons",
     currentRole: "Super Admin",
     activeTab: "overview",
     activeModal: null,
@@ -643,7 +784,10 @@
       returns: "",
       support: "",
       customers: "",
-      inquiries: ""
+      inquiries: "",
+      appointments: "",
+      coupons: "",
+      campaigns: ""
     },
     filters: {
       productCategory: "all",
@@ -653,7 +797,8 @@
       customerSegment: "all",
       inquiryStatus: "all",
       ticketStatus: "all",
-      returnStatus: "all"
+      returnStatus: "all",
+      appointmentStatus: "all"
     }
   };
 
@@ -723,18 +868,33 @@
     try { state.testMatrix = JSON.parse(localStorage.getItem(STORAGE.TEST_MATRIX)) || DEFAULT_TEST_MATRIX; } catch (e) { state.testMatrix = DEFAULT_TEST_MATRIX; }
     try { state.currentRole = localStorage.getItem(STORAGE.ROLE) || "Super Admin"; } catch (e) { state.currentRole = "Super Admin"; }
 
-    // Ensure live Razorpay credentials are set
-    if (!state.settings.razorpayKeyId || state.settings.razorpayKeyId.startsWith("rzp_test_")) {
-      state.settings.razorpayKeyId = "rzp_live_U3WTW0imCLEeJr";
-      state.settings.razorpayKeySecret = "jSvBCtND4EKBBTDw9dqfTELi";
-      state.settings.razorpayMode = "live";
-      saveData(STORAGE.SETTINGS, state.settings);
+    try { state.appointments = JSON.parse(localStorage.getItem(STORAGE.APPOINTMENTS)) || DEFAULT_APPOINTMENTS; } catch (e) { state.appointments = DEFAULT_APPOINTMENTS; }
+    try { state.coupons = JSON.parse(localStorage.getItem(STORAGE.COUPONS)) || DEFAULT_COUPONS; } catch (e) { state.coupons = DEFAULT_COUPONS; }
+    try { state.campaigns = JSON.parse(localStorage.getItem(STORAGE.CAMPAIGNS)) || DEFAULT_CAMPAIGNS; } catch (e) { state.campaigns = DEFAULT_CAMPAIGNS; }
+
+    // Check if optional untracked window.BHAU_CONFIG exists locally
+    if (window.BHAU_CONFIG) {
+      if (!state.settings.razorpayKeyId && window.BHAU_CONFIG.razorpayKeyId) {
+        state.settings.razorpayKeyId = window.BHAU_CONFIG.razorpayKeyId;
+      }
+      if (!state.settings.razorpayKeySecret && window.BHAU_CONFIG.razorpayKeySecret) {
+        state.settings.razorpayKeySecret = window.BHAU_CONFIG.razorpayKeySecret;
+      }
+      if (window.BHAU_CONFIG.razorpayMode) {
+        state.settings.razorpayMode = window.BHAU_CONFIG.razorpayMode;
+      }
+      if (window.BHAU_CONFIG.razorpayMerchantName) {
+        state.settings.razorpayMerchantName = window.BHAU_CONFIG.razorpayMerchantName;
+      }
     }
 
     // Save initial defaults if missing
     if (!localStorage.getItem(STORAGE.PRODUCTS)) saveData(STORAGE.PRODUCTS, state.products);
     if (!localStorage.getItem(STORAGE.SETTINGS)) saveData(STORAGE.SETTINGS, state.settings);
     if (!localStorage.getItem(STORAGE.TEST_MATRIX)) saveData(STORAGE.TEST_MATRIX, state.testMatrix);
+    if (!localStorage.getItem(STORAGE.APPOINTMENTS)) saveData(STORAGE.APPOINTMENTS, state.appointments);
+    if (!localStorage.getItem(STORAGE.COUPONS)) saveData(STORAGE.COUPONS, state.coupons);
+    if (!localStorage.getItem(STORAGE.CAMPAIGNS)) saveData(STORAGE.CAMPAIGNS, state.campaigns);
   }
 
   function saveData(key, val) {
@@ -890,6 +1050,12 @@
 
     const tCount = document.getElementById("navCountTickets");
     if (tCount) tCount.textContent = state.tickets.filter(t => t.status !== "Closed").length;
+
+    const aptCount = document.getElementById("navCountAppointments");
+    if (aptCount) {
+      const activeApts = state.appointments.filter(a => a.status === "Confirmed" || a.status === "Pending").length;
+      aptCount.textContent = activeApts;
+    }
 
     const lowStockCount = state.products.filter(p => p.status === "low-stock" || (typeof p.stock === "number" && p.stock <= 15)).length;
     const lowBadge = document.getElementById("navCountLowStock");
@@ -2112,7 +2278,8 @@
     if (rzpForm) {
       const isEnabled = s.razorpayEnabled !== false;
       const rzpMode = s.razorpayMode || "live";
-      const keyId = s.razorpayKeyId || "rzp_live_U3WTW0imCLEeJr";
+      const keyId = s.razorpayKeyId || (window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayKeyId) || "";
+      const keySec = s.razorpayKeySecret || (window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayKeySecret) || "";
 
       const elEnabled = document.getElementById("setRzpEnabled");
       if (elEnabled) elEnabled.checked = isEnabled;
@@ -2121,13 +2288,30 @@
       const elKeyId = document.getElementById("setRzpKeyId");
       if (elKeyId) elKeyId.value = keyId;
       const elKeySec = document.getElementById("setRzpKeySecret");
-      if (elKeySec) elKeySec.value = s.razorpayKeySecret || "jSvBCtND4EKBBTDw9dqfTELi";
+      if (elKeySec) elKeySec.value = keySec;
       const elMName = document.getElementById("setRzpMerchantName");
       if (elMName) elMName.value = s.razorpayMerchantName || s.storeName || "Bhau Korde Masale";
       const elThemeColor = document.getElementById("setRzpThemeColor");
       if (elThemeColor) elThemeColor.value = s.razorpayThemeColor || "#c8501e";
       const elThemeColorText = document.getElementById("setRzpThemeColorText");
       if (elThemeColorText) elThemeColorText.value = s.razorpayThemeColor || "#c8501e";
+
+      const badge = document.getElementById("razorpayStatusBadge");
+      if (badge) {
+        if (keyId) {
+          badge.className = "status-badge";
+          badge.style.background = "rgba(21,128,61,0.12)";
+          badge.style.color = "#15803d";
+          badge.style.border = "1px solid rgba(21,128,61,0.3)";
+          badge.innerHTML = `<i class="bi bi-shield-check-fill"></i> Gateway Configured (${rzpMode === "live" ? "Live Production" : "Sandbox Test"})`;
+        } else {
+          badge.className = "status-badge";
+          badge.style.background = "rgba(180,83,9,0.12)";
+          badge.style.color = "#b45309";
+          badge.style.border = "1px solid rgba(180,83,9,0.3)";
+          badge.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Keys Not Set (Enter Key ID)`;
+        }
+      }
     }
 
     // Role Switcher Matrix
@@ -2155,10 +2339,391 @@
     }
   }
 
+  // ==========================================================================
+  // MODULE: MARKETING & PROMOTIONAL CAMPAIGNS
+  // ==========================================================================
+  function setMarketingSubTab(sub) {
+    state.marketingSubTab = sub;
+    const btnCoupons = document.getElementById("mktSubtabCoupons");
+    const btnCampaigns = document.getElementById("mktSubtabCampaigns");
+    const secCoupons = document.getElementById("marketingCouponsSection");
+    const secCampaigns = document.getElementById("marketingCampaignsSection");
+
+    if (btnCoupons) btnCoupons.classList.toggle("active", sub === "coupons");
+    if (btnCampaigns) btnCampaigns.classList.toggle("active", sub === "campaigns");
+    if (secCoupons) secCoupons.style.display = sub === "coupons" ? "block" : "none";
+    if (secCampaigns) secCampaigns.style.display = sub === "campaigns" ? "block" : "none";
+  }
+
+  function renderMarketing() {
+    // KPI Cards
+    const elCampCount = document.getElementById("marketingKpiCampaigns");
+    if (elCampCount) elCampCount.textContent = state.campaigns.length;
+
+    const elCpnCount = document.getElementById("marketingKpiCoupons");
+    if (elCpnCount) elCpnCount.textContent = state.coupons.filter(c => c.active).length;
+
+    const totalReach = state.campaigns.reduce((sum, c) => sum + (c.reach || 0), 0);
+    const elReach = document.getElementById("marketingKpiReach");
+    if (elReach) elReach.textContent = totalReach.toLocaleString("en-IN");
+
+    const totalOrders = state.campaigns.reduce((sum, c) => sum + (c.orders || 0), 0);
+    const elOrders = document.getElementById("marketingKpiOrders");
+    if (elOrders) elOrders.textContent = totalOrders.toLocaleString("en-IN");
+
+    // Render Coupons Table
+    const tbody = document.getElementById("couponsTableBody");
+    if (tbody) {
+      if (!state.coupons.length) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted)">No promo coupons created yet. Click "Create Promo Coupon" above.</td></tr>`;
+      } else {
+        tbody.innerHTML = state.coupons.map(cp => {
+          const disc = cp.discountType === "percentage" ? `${cp.discountValue}% OFF` : `₹${cp.discountValue} FLAT OFF`;
+          const statusBadge = cp.active 
+            ? `<span class="status-badge" style="background:rgba(21,128,61,0.12);color:#15803d;border:1px solid rgba(21,128,61,0.3)"><i class="bi bi-check-circle-fill"></i> Active</span>`
+            : `<span class="status-badge" style="background:rgba(185,28,28,0.12);color:#b91c1c;border:1px solid rgba(185,28,28,0.3)"><i class="bi bi-slash-circle"></i> Inactive</span>`;
+          return `
+            <tr>
+              <td>
+                <span class="coupon-tag">${esc(cp.code)}</span>
+              </td>
+              <td>${esc(cp.description || "Special promotional voucher")}</td>
+              <td><b style="color:var(--accent)">${disc}</b></td>
+              <td>₹${Number(cp.minOrder || 0).toLocaleString("en-IN")}</td>
+              <td><b>${cp.timesRedeemed || 0}</b> times</td>
+              <td>${esc(cp.expiryDate || "No Expiry")}</td>
+              <td>${statusBadge}</td>
+              <td>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <button type="button" class="btn-outline" style="font-size:11px;padding:4px 8px;" onclick="window.BK_CRM.copyCouponCode('${esc(cp.code)}')" title="Copy coupon code">
+                    <i class="bi bi-copy"></i> Copy
+                  </button>
+                  <button type="button" class="btn-outline" style="font-size:11px;padding:4px 8px;" onclick="window.BK_CRM.toggleCouponStatus('${esc(cp.code)}')" title="${cp.active ? 'Deactivate' : 'Activate'}">
+                    <i class="bi ${cp.active ? 'bi-toggle-on' : 'bi-toggle-off'}"></i> ${cp.active ? 'Disable' : 'Enable'}
+                  </button>
+                  <button type="button" class="btn-outline" style="font-size:11px;padding:4px 8px;color:var(--danger);border-color:var(--danger-border)" onclick="window.BK_CRM.deleteCoupon('${esc(cp.code)}')" title="Delete Coupon">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      }
+    }
+
+    // Render Campaigns Grid
+    const cGrid = document.getElementById("campaignsGrid");
+    if (cGrid) {
+      if (!state.campaigns.length) {
+        cGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--muted)">No broadcast campaigns configured yet.</div>`;
+      } else {
+        cGrid.innerHTML = state.campaigns.map(cmp => {
+          return `
+            <div class="campaign-card">
+              <div>
+                <div class="campaign-header">
+                  <div class="campaign-title">${esc(cmp.title)}</div>
+                  <span class="campaign-channel-badge"><i class="bi bi-whatsapp"></i> ${esc(cmp.channel)}</span>
+                </div>
+                <div style="font-size:11.5px;color:var(--muted);margin-bottom:8px;">
+                  Target Segment: <b style="color:var(--fg)">${esc(cmp.target)}</b>
+                </div>
+                <div class="campaign-bubble">${esc(cmp.message)}</div>
+                <div class="campaign-metrics">
+                  <div>Reach: <b>${(cmp.reach || 0).toLocaleString("en-IN")}</b></div>
+                  <div>Engaged: <b>${(cmp.clicks || 0).toLocaleString("en-IN")}</b></div>
+                  <div>Orders: <b>${(cmp.orders || 0).toLocaleString("en-IN")}</b></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
+                <button type="button" class="btn-primary" style="flex:1;justify-content:center;font-size:12px;background:#25D366;border-color:#25D366" onclick="window.BK_CRM.launchCampaignWhatsApp('${esc(cmp.id)}')">
+                  <i class="bi bi-whatsapp"></i> Launch WhatsApp Broadcast
+                </button>
+                <button type="button" class="btn-outline" style="font-size:12px;padding:6px 10px;" onclick="window.BK_CRM.copyCouponCode('${esc(cmp.message).replace(/'/g, "\\'")}')">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+    }
+  }
+
+  function openAddCouponModal() {
+    const m = document.getElementById("modalCoupon");
+    if (m) {
+      document.getElementById("couponForm").reset();
+      m.classList.add("active");
+    }
+  }
+
+  function saveCoupon(e) {
+    if (e) e.preventDefault();
+    const code = document.getElementById("couponFormCode").value.trim().toUpperCase();
+    const type = document.getElementById("couponFormType").value;
+    const val = parseFloat(document.getElementById("couponFormValue").value) || 0;
+    const minOrder = parseFloat(document.getElementById("couponFormMinOrder").value) || 0;
+    const expiry = document.getElementById("couponFormExpiry").value;
+    const desc = document.getElementById("couponFormDesc").value.trim();
+
+    if (!code) {
+      toast("Please specify a coupon code.", "error");
+      return;
+    }
+
+    const existingIdx = state.coupons.findIndex(c => c.code === code);
+    const couponObj = {
+      code,
+      description: desc || `${val}${type === "percentage" ? "%" : "₹"} promotional discount`,
+      discountType: type,
+      discountValue: val,
+      minOrder,
+      timesRedeemed: existingIdx >= 0 ? state.coupons[existingIdx].timesRedeemed : 0,
+      expiryDate: expiry || "2026-12-31",
+      active: true
+    };
+
+    if (existingIdx >= 0) {
+      state.coupons[existingIdx] = couponObj;
+      toast(`Coupon ${code} updated successfully!`);
+    } else {
+      state.coupons.unshift(couponObj);
+      toast(`Promo Coupon ${code} created successfully!`);
+    }
+
+    saveData(STORAGE.COUPONS, state.coupons);
+    renderMarketing();
+    const m = document.getElementById("modalCoupon");
+    if (m) m.classList.remove("active");
+  }
+
+  function toggleCouponStatus(code) {
+    const cp = state.coupons.find(c => c.code === code);
+    if (cp) {
+      cp.active = !cp.active;
+      saveData(STORAGE.COUPONS, state.coupons);
+      renderMarketing();
+      toast(`Coupon ${code} is now ${cp.active ? 'active' : 'inactive'}.`);
+    }
+  }
+
+  function copyCouponCode(code) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(() => {
+        toast(`Copied "${code}" to clipboard!`);
+      });
+    } else {
+      toast(`Code: ${code}`);
+    }
+  }
+
+  function deleteCoupon(code) {
+    if (!confirm(`Are you sure you want to delete promo coupon "${code}"?`)) return;
+    state.coupons = state.coupons.filter(c => c.code !== code);
+    saveData(STORAGE.COUPONS, state.coupons);
+    renderMarketing();
+    toast(`Coupon ${code} deleted.`);
+  }
+
+  function launchCampaignWhatsApp(campaignId) {
+    const cmp = state.campaigns.find(c => c.id === campaignId);
+    if (!cmp) return;
+    const url = `https://wa.me/?text=${encodeURIComponent(cmp.message)}`;
+    window.open(url, "_blank");
+    toast(`WhatsApp broadcast composer opened for "${cmp.title}"!`);
+  }
+
+  // ==========================================================================
+  // MODULE: APPOINTMENTS & CONSULTATIONS
+  // ==========================================================================
+  function renderAppointments() {
+    const searchVal = (state.search.appointments || "").toLowerCase();
+    const filterStatus = state.filters.appointmentStatus || "all";
+
+    const filtered = state.appointments.filter(a => {
+      const matchSearch = !searchVal || 
+        (a.id && a.id.toLowerCase().includes(searchVal)) ||
+        (a.customer && a.customer.toLowerCase().includes(searchVal)) ||
+        (a.phone && a.phone.toLowerCase().includes(searchVal)) ||
+        (a.purpose && a.purpose.toLowerCase().includes(searchVal)) ||
+        (a.location && a.location.toLowerCase().includes(searchVal));
+      
+      const matchStatus = filterStatus === "all" || a.status === filterStatus;
+      return matchSearch && matchStatus;
+    });
+
+    // KPI Cards
+    const elTotal = document.getElementById("aptKpiTotal");
+    if (elTotal) elTotal.textContent = state.appointments.length;
+
+    const elUpcoming = document.getElementById("aptKpiUpcoming");
+    if (elUpcoming) elUpcoming.textContent = state.appointments.filter(a => a.status === "Confirmed").length;
+
+    const elPending = document.getElementById("aptKpiPending");
+    if (elPending) elPending.textContent = state.appointments.filter(a => a.status === "Pending").length;
+
+    const elCompleted = document.getElementById("aptKpiCompleted");
+    if (elCompleted) elCompleted.textContent = state.appointments.filter(a => a.status === "Completed").length;
+
+    // Render Table
+    const tbody = document.getElementById("appointmentsTableBody");
+    if (tbody) {
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">No appointments matching the selected filter. Click "Schedule Appointment" to book a consultation.</td></tr>`;
+      } else {
+        tbody.innerHTML = filtered.map(apt => {
+          const statusClass = (apt.status || "Pending").toLowerCase();
+          const badgeIcon = apt.status === "Confirmed" ? "bi-check2-circle" : apt.status === "Pending" ? "bi-clock-history" : apt.status === "Completed" ? "bi-award-fill" : "bi-x-circle";
+          return `
+            <tr>
+              <td><b style="font-family:monospace">${esc(apt.id)}</b></td>
+              <td>
+                <b style="font-size:13.5px">${esc(apt.customer)}</b>
+                ${apt.notes ? `<div style="font-size:11.5px;color:var(--muted);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(apt.notes)}">${esc(apt.notes)}</div>` : ''}
+              </td>
+              <td>
+                <a href="tel:${esc(apt.phone)}" style="color:var(--accent);text-decoration:none;font-weight:500;">
+                  <i class="bi bi-telephone"></i> ${esc(apt.phone)}
+                </a>
+                ${apt.email ? `<div style="font-size:11px;color:var(--muted);">${esc(apt.email)}</div>` : ''}
+              </td>
+              <td>
+                <span class="apt-purpose-badge">
+                  <i class="bi bi-cup-hot" style="color:var(--accent)"></i> ${esc(apt.purpose)}
+                </span>
+              </td>
+              <td>
+                <div style="font-weight:600;font-size:13px">${esc(apt.date)}</div>
+                <div style="font-size:11.5px;color:var(--muted);"><i class="bi bi-clock"></i> ${esc(apt.time)}</div>
+              </td>
+              <td><small>${esc(apt.location)}</small></td>
+              <td>
+                <span class="apt-status-badge ${statusClass}">
+                  <i class="bi ${badgeIcon}"></i> ${esc(apt.status)}
+                </span>
+              </td>
+              <td>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <button type="button" class="btn-outline" style="font-size:11px;padding:4px 8px;background:rgba(37,211,102,0.08);color:#16a34a;border-color:rgba(37,211,102,0.3)" onclick="window.BK_CRM.sendAppointmentWhatsApp('${esc(apt.id)}')" title="Send WhatsApp Confirmation">
+                    <i class="bi bi-whatsapp"></i>
+                  </button>
+                  <select style="font-size:11.5px;padding:3px 6px;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--surface);" onchange="window.BK_CRM.updateAppointmentStatus('${esc(apt.id)}', this.value)">
+                    <option value="Confirmed" ${apt.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                    <option value="Pending" ${apt.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                    <option value="Completed" ${apt.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                    <option value="Cancelled" ${apt.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                  </select>
+                  <button type="button" class="btn-outline" style="font-size:11px;padding:4px 8px;color:var(--danger);border-color:var(--danger-border)" onclick="window.BK_CRM.deleteAppointment('${esc(apt.id)}')" title="Delete Booking">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      }
+    }
+  }
+
+  function openScheduleAppointmentModal() {
+    const m = document.getElementById("modalAppointment");
+    if (m) {
+      document.getElementById("appointmentForm").reset();
+      const nextId = "APT-2026-" + (state.appointments.length + 101);
+      document.getElementById("aptFormId").value = nextId;
+      const today = new Date().toISOString().split("T")[0];
+      const dInput = document.getElementById("aptFormDate");
+      if (dInput) dInput.value = today;
+      m.classList.add("active");
+    }
+  }
+
+  function saveAppointment(e) {
+    if (e) e.preventDefault();
+    const id = document.getElementById("aptFormId").value || ("APT-2026-" + Date.now().toString().slice(-4));
+    const customer = document.getElementById("aptFormCustomer").value.trim();
+    const phone = document.getElementById("aptFormPhone").value.trim();
+    const email = document.getElementById("aptFormEmail").value.trim();
+    const purpose = document.getElementById("aptFormPurpose").value;
+    const date = document.getElementById("aptFormDate").value;
+    const time = document.getElementById("aptFormTime").value.trim();
+    const location = document.getElementById("aptFormLocation").value.trim();
+    const status = document.getElementById("aptFormStatus").value;
+    const notes = document.getElementById("aptFormNotes").value.trim();
+
+    if (!customer || !phone || !date || !time) {
+      toast("Please complete all required appointment fields.", "error");
+      return;
+    }
+
+    const aptObj = {
+      id,
+      customer,
+      phone,
+      email,
+      purpose,
+      date,
+      time,
+      location,
+      status,
+      notes,
+      createdAt: formatDate(new Date())
+    };
+
+    const existingIdx = state.appointments.findIndex(a => a.id === id);
+    if (existingIdx >= 0) {
+      state.appointments[existingIdx] = aptObj;
+      toast(`Appointment ${id} updated.`);
+    } else {
+      state.appointments.unshift(aptObj);
+      toast(`Appointment scheduled for ${customer}!`);
+    }
+
+    saveData(STORAGE.APPOINTMENTS, state.appointments);
+    renderAppointments();
+    updateNavBadges();
+    const m = document.getElementById("modalAppointment");
+    if (m) m.classList.remove("active");
+  }
+
+  function updateAppointmentStatus(aptId, newStatus) {
+    const apt = state.appointments.find(a => a.id === aptId);
+    if (apt) {
+      apt.status = newStatus;
+      saveData(STORAGE.APPOINTMENTS, state.appointments);
+      renderAppointments();
+      updateNavBadges();
+      toast(`Appointment ${aptId} status changed to ${newStatus}.`);
+    }
+  }
+
+  function sendAppointmentWhatsApp(aptId) {
+    const apt = state.appointments.find(a => a.id === aptId);
+    if (!apt) return;
+    const cleanPhone = (apt.phone || "").replace(/[^0-9]/g, "");
+    const msg = `Namaste ${apt.customer}! 🌿\n\nYour consultation with *Bhau Korde Masale* is confirmed:\n*Booking ID:* ${apt.id}\n*Purpose:* ${apt.purpose}\n*Date & Time:* ${apt.date} at ${apt.time}\n*Location:* ${apt.location}\n\nWe look forward to sharing our pure handcrafted spice traditions with you!\n_चवीने खाणार त्याला भाऊ देणार._`;
+    const url = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
+    toast(`WhatsApp confirmation opened for ${apt.customer}!`);
+  }
+
+  function deleteAppointment(aptId) {
+    if (!confirm(`Are you sure you want to delete appointment booking "${aptId}"?`)) return;
+    state.appointments = state.appointments.filter(a => a.id !== aptId);
+    saveData(STORAGE.APPOINTMENTS, state.appointments);
+    renderAppointments();
+    updateNavBadges();
+    toast(`Appointment ${aptId} deleted.`);
+  }
+
   // Master Render
   function renderAll() {
     updateNavBadges();
     renderOverview();
+    renderMarketing();
+    renderAppointments();
     renderOrders();
     renderPayments();
     renderShipping();
@@ -3968,6 +4533,8 @@
     if (cSearch) cSearch.addEventListener("input", (e) => { state.search.customers = e.target.value; renderCustomers(); });
     const iSearch = document.getElementById("searchInquiriesInput");
     if (iSearch) iSearch.addEventListener("input", (e) => { state.search.inquiries = e.target.value; renderInquiries(); });
+    const aptSearch = document.getElementById("searchAppointmentsInput");
+    if (aptSearch) aptSearch.addEventListener("input", (e) => { state.search.appointments = e.target.value; renderAppointments(); });
 
     // Filters
     const pCatFilter = document.getElementById("filterProductCategory");
@@ -3980,6 +4547,21 @@
     if (cSegFilter) cSegFilter.addEventListener("change", (e) => { state.filters.customerSegment = e.target.value; renderCustomers(); });
     const iStatusFilter = document.getElementById("filterInquiryStatus");
     if (iStatusFilter) iStatusFilter.addEventListener("change", (e) => { state.filters.inquiryStatus = e.target.value; renderInquiries(); });
+    const aptStatusFilter = document.getElementById("filterAppointmentStatus");
+    if (aptStatusFilter) aptStatusFilter.addEventListener("change", (e) => { state.filters.appointmentStatus = e.target.value; renderAppointments(); });
+
+    // Secret Key Toggle Visibility
+    const btnToggleSecret = document.getElementById("btnToggleRzpSecret");
+    if (btnToggleSecret) {
+      btnToggleSecret.addEventListener("click", function() {
+        const input = document.getElementById("setRzpKeySecret");
+        if (input) {
+          const isPass = input.type === "password";
+          input.type = isPass ? "text" : "password";
+          this.innerHTML = isPass ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+        }
+      });
+    }
 
     // Payment sub-tabs switcher
     document.querySelectorAll("[data-pay-subtab]").forEach(btn => {
@@ -4183,6 +4765,18 @@
     switchTab,
     renderAll,
     setPaymentSubTab: function(sub) { state.paymentSubTab = sub; renderPayments(); },
+    setMarketingSubTab,
+    openAddCouponModal,
+    saveCoupon,
+    toggleCouponStatus,
+    copyCouponCode,
+    deleteCoupon,
+    launchCampaignWhatsApp,
+    openScheduleAppointmentModal,
+    saveAppointment,
+    updateAppointmentStatus,
+    sendAppointmentWhatsApp,
+    deleteAppointment,
     updateStorageQuotaDisplay: renderSettings,
     runTestScenario,
     runAllTestScenarios,

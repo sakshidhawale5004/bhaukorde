@@ -410,8 +410,13 @@
       return;
     }
 
-    var keyId = (s.razorpayKeyId || "rzp_live_U3WTW0imCLEeJr").trim();
-    var merchantName = s.razorpayMerchantName || s.storeName || "Bhau Korde Masale";
+    var keyId = ((window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayKeyId) || s.razorpayKeyId || "").trim();
+    if (!keyId) {
+      alert("Online payment gateway is being configured. Please choose Cash on Delivery or contact us on WhatsApp (+91 91678 34686) to place your order.");
+      isSubmittingOrder = false;
+      return;
+    }
+    var merchantName = (window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayMerchantName) || s.razorpayMerchantName || s.storeName || "Bhau Korde Masale";
     var themeColor = s.razorpayThemeColor || "#c8501e";
     var orderAmount = total(c);
     var orderAmountPaise = Math.round(orderAmount * 100);
@@ -559,8 +564,12 @@
       setTimeout(function() {
         var s = {};
         try { s = JSON.parse(localStorage.getItem("bk_crm_settings") || "{}"); } catch(e) {}
-        var keyId = (s.razorpayKeyId || "rzp_live_U3WTW0imCLEeJr").trim();
-        var merchantName = s.razorpayMerchantName || "Bhau Korde Masale";
+        var keyId = ((window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayKeyId) || s.razorpayKeyId || "").trim();
+        if (!keyId) {
+          alert("Online payment gateway is being configured. Please contact store support on WhatsApp (+91 91678 34686) to complete your payment.");
+          return;
+        }
+        var merchantName = (window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayMerchantName) || s.razorpayMerchantName || "Bhau Korde Masale";
         if (typeof window.Razorpay !== "undefined") {
           var rzp = new window.Razorpay({
             key: keyId,
