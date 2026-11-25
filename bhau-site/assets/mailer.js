@@ -72,6 +72,32 @@
   }
 
   /**
+   * Helper to attempt dispatch across multiple supported endpoints (Node server & Hostinger PHP)
+   */
+  async function postToApi(endpoints, payload) {
+    for (var i = 0; i < endpoints.length; i++) {
+      try {
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function() { controller.abort(); }, 5000);
+        var resp = await fetch(getApiEndpoint(endpoints[i]), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+          var data = await resp.json();
+          if (data && (data.success || data.status === "success" || data.status === "online")) {
+            return { ok: true, data: data };
+          }
+        }
+      } catch (err) {}
+    }
+    return { ok: false };
+  }
+
+  /**
    * Send Order Booking Notification to bhaukorde1975@gmail.com
    * @param {Object} order The complete order object
    * @returns {Promise<Object>}
@@ -83,27 +109,13 @@
 
     console.log(`[BK_MAILER] Dispatching order booking notification for #${order.id} to ${targetEmail}...`);
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const endpoints = ["/api/notify/order", "api/notify.php", "../api/notify.php"];
+    const res = await postToApi(endpoints, order);
 
-      const resp = await fetch(getApiEndpoint("/api/notify/order"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(order),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
-      if (resp.ok) {
-        const data = await resp.json();
-        const mode = data.mode === "smtp" ? "delivered" : "logged_offline";
-        logEmail("order_booking", targetEmail, subject, mode, `Order #${order.id} for ₹${order.total} (${order.payment})`);
-        return { success: true, mode: data.mode, recipient: targetEmail };
-      }
-    } catch (netErr) {
-      // Backend not running (e.g. static site opened directly)
-      console.warn("[BK_MAILER] Local SMTP server unreachable. Logging order notification locally.", netErr.message);
+    if (res.ok) {
+      const mode = res.data.mode === "smtp" || res.data.mode === "hostinger_php_mail" ? "delivered" : "logged_offline";
+      logEmail("order_booking", targetEmail, subject, mode, `Order #${order.id} for ₹${order.total} (${order.payment})`);
+      return { success: true, mode: res.data.mode, recipient: targetEmail };
     }
 
     // Fallback: Record notification in local storage log so admin sees it in CRM
@@ -120,25 +132,12 @@
     const targetEmail = getTargetEmail();
     const subject = `📬 New Website Inquiry from ${inquiry.name}`;
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const endpoints = ["/api/notify/inquiry", "api/notify.php", "../api/notify.php"];
+    const res = await postToApi(endpoints, inquiry);
 
-      const resp = await fetch(getApiEndpoint("/api/notify/inquiry"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(inquiry),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
-      if (resp.ok) {
-        const data = await resp.json();
-        logEmail("inquiry", targetEmail, subject, "delivered", `Lead from ${inquiry.name} (${inquiry.phone || inquiry.email})`);
-        return { success: true, mode: data.mode };
-      }
-    } catch (e) {
-      console.warn("[BK_MAILER] Local SMTP server unreachable for inquiry.", e.message);
+    if (res.ok) {
+      logEmail("inquiry", targetEmail, subject, "delivered", `Lead from ${inquiry.name} (${inquiry.phone || inquiry.email})`);
+      return { success: true, mode: res.data.mode };
     }
 
     logEmail("inquiry", targetEmail, subject, "logged_offline", `Lead from ${inquiry.name} (${inquiry.phone || inquiry.email}) - Recorded locally`);
@@ -152,17 +151,13 @@
     const targetEmail = getTargetEmail();
     const subject = `⚠️ ${title || "Store Alert"}`;
 
-    try {
-      const resp = await fetch(getApiEndpoint("/api/notify/alert"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, title, message, data })
-      });
-      if (resp.ok) {
-        logEmail("alert", targetEmail, subject, "delivered", message);
-        return { success: true };
-      }
-    } catch (e) {}
+    const endpoints = ["/api/notify/alert", "api/notify.php", "../api/notify.php"];
+    const res = await postToApi(endpoints, { type, title, message, data });
+
+    if (res.ok) {
+      logEmail("alert", targetEmail, subject, "delivered", message);
+      return { success: true };
+    }
 
     logEmail("alert", targetEmail, subject, "logged_offline", message);
     return { success: true, mode: "logged_offline" };
@@ -182,25 +177,17 @@
    */
   async function sendTestEmail(email) {
     const target = (email || getTargetEmail()).trim();
-    try {
-      const resp = await fetch(getApiEndpoint("/api/test-email"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: target })
-      });
-      const data = await resp.json();
-      if (resp.ok && data.success) {
-        logEmail("test", target, "✅ Test Email: SMTP Dispatcher Ready", "delivered", "Manual test triggered from Staff CRM");
-        return { success: true, message: data.message };
-      } else {
-        logEmail("test", target, "❌ Test Email Failed", "failed", data.error || "SMTP authentication failed");
-        return { success: false, error: data.error || "Failed to send test email" };
-      }
-    } catch (err) {
-      const errMsg = "Backend server not responding. Run 'npm start' in terminal to activate SMTP dispatch.";
-      logEmail("test", target, "❌ Test Email Failed (Server Offline)", "failed", errMsg);
-      return { success: false, error: errMsg };
+    const endpoints = ["/api/test-email", "api/notify.php?test=1", "../api/notify.php?test=1"];
+    const res = await postToApi(endpoints, { email: target });
+
+    if (res.ok) {
+      logEmail("test", target, "✅ Test Email: Dispatcher Ready", "delivered", "Manual test triggered from Staff CRM");
+      return { success: true, message: res.data.message || `Test email successfully sent to ${target}!` };
     }
+
+    const errMsg = "Notification server endpoint not responding. Set up your SMTP in .env or run PHP on Hostinger.";
+    logEmail("test", target, "❌ Test Email Failed", "failed", errMsg);
+    return { success: false, error: errMsg };
   }
 
   // Export to global window object
