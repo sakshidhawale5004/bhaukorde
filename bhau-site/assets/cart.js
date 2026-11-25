@@ -134,6 +134,11 @@
       try {
         window.dispatchEvent(new StorageEvent("storage", { key: "bk_crm_failed_payments" }));
       } catch(e) {}
+
+      // Send email alert to bhaukorde1975@gmail.com
+      if (window.BK_MAILER && typeof window.BK_MAILER.notifyFailedPayment === "function") {
+        window.BK_MAILER.notifyFailedPayment(custInfo, c, orderAmount, reason);
+      }
     } catch(e) {}
   }
 
@@ -383,6 +388,11 @@
     // Automatic Stock Deduction
     deductStock(c);
 
+    // Send Instant Order Notification to bhaukorde1975@gmail.com
+    if (window.BK_MAILER && typeof window.BK_MAILER.notifyOrder === "function") {
+      window.BK_MAILER.notifyOrder(newOrder);
+    }
+
     BK.clear();
     render();
     showSuccessModal(newOrder);
@@ -410,7 +420,7 @@
       return;
     }
 
-    var keyId = ((window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayKeyId) || s.razorpayKeyId || "").trim();
+    var keyId = ((window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayKeyId) || s.razorpayKeyId || "rzp_live_U4HhHneqSk9NoP").trim();
     if (!keyId) {
       alert("Online payment gateway is being configured. Please choose Cash on Delivery or contact us on WhatsApp (+91 91678 34686) to place your order.");
       isSubmittingOrder = false;
@@ -550,6 +560,11 @@
     // Automatic Stock Deduction
     deductStock(c);
 
+    // Send Instant Order Notification to bhaukorde1975@gmail.com
+    if (window.BK_MAILER && typeof window.BK_MAILER.notifyOrder === "function") {
+      window.BK_MAILER.notifyOrder(newOrder);
+    }
+
     BK.clear();
     render();
     showSuccessModal(newOrder);
@@ -564,7 +579,7 @@
       setTimeout(function() {
         var s = {};
         try { s = JSON.parse(localStorage.getItem("bk_crm_settings") || "{}"); } catch(e) {}
-        var keyId = ((window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayKeyId) || s.razorpayKeyId || "").trim();
+        var keyId = ((window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayKeyId) || s.razorpayKeyId || "rzp_live_U4HhHneqSk9NoP").trim();
         if (!keyId) {
           alert("Online payment gateway is being configured. Please contact store support on WhatsApp (+91 91678 34686) to complete your payment.");
           return;

@@ -556,11 +556,31 @@ function recordCRMInquiry(type){
   } catch(e){}
 }
 $("#cform").addEventListener("submit",function(e){e.preventDefault();if(!check())return;
+  var inqData = {
+    name: $("#fn").value.trim(),
+    email: $("#fe").value.trim(),
+    phone: $("#fp").value.trim() || "",
+    website: $("#fw").value.trim() || "",
+    message: $("#fm").value.trim()
+  };
   recordCRMInquiry("Email Form Lead");
+  if (window.BK_MAILER && typeof window.BK_MAILER.notifyInquiry === "function") {
+    window.BK_MAILER.notifyInquiry(inqData);
+  }
   location.href="mailto:"+MAIL+"?subject="+encodeURIComponent("Website enquiry from "+$("#fn").value.trim())+"&body="+encodeURIComponent(body());
-  toast("Opening your email app…")});
+  toast("Message sent! Notification dispatched to "+MAIL);});
 $("#fwa").onclick=function(){if(!check())return;
+  var inqData = {
+    name: $("#fn").value.trim(),
+    email: $("#fe").value.trim(),
+    phone: $("#fp").value.trim() || "",
+    website: $("#fw").value.trim() || "",
+    message: $("#fm").value.trim()
+  };
   recordCRMInquiry("WhatsApp Direct Lead");
+  if (window.BK_MAILER && typeof window.BK_MAILER.notifyInquiry === "function") {
+    window.BK_MAILER.notifyInquiry(inqData);
+  }
   window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(body()),"_blank","noopener")};
 
 /* mobile menu */
@@ -575,6 +595,7 @@ if("IntersectionObserver" in window){
 }else{els.forEach(function(el){el.classList.add("show")})}
 </script>
 
+<script src="assets/mailer.js"></script>
 <script src="assets/cart.js"></script>
 </body>
 </html>

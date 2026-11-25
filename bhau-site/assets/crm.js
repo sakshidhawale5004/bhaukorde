@@ -42,12 +42,24 @@
     // Razorpay Payment Gateway Configuration (Saved securely in localStorage, never committed to GitHub)
     razorpayEnabled: true,
     razorpayMode: "live",
-    razorpayKeyId: "",
+    razorpayKeyId: "rzp_live_U4HhHneqSk9NoP",
     razorpayKeySecret: "",
     razorpayMerchantName: "Bhau Korde Masale",
     razorpayThemeColor: "#c8501e",
     razorpayChannels: ["upi", "cards", "netbanking"],
-    defaultCourier: "Delhivery Express"
+    defaultCourier: "Delhivery Express",
+    // Automated Email Notification & SMTP Settings
+    notificationEmail: "bhaukorde1975@gmail.com",
+    smtpHost: "smtp.gmail.com",
+    smtpPort: 465,
+    smtpSecure: true,
+    smtpUser: "bhaukorde1975@gmail.com",
+    smtpPass: "",
+    notifTriggerOrder: true,
+    notifTriggerInquiry: true,
+    notifTriggerFailedPay: true,
+    notifTriggerLowStock: true,
+    notifTriggerCustReceipt: true
   };
 
   const DEFAULT_PRODUCTS = [
@@ -1231,6 +1243,9 @@
               <button class="action-icon-btn" title="Print Warehouse Packing Slip" onclick="window.BK_CRM.viewPackingSlip('${esc(o.id)}')">
                 <i class="bi bi-card-checklist"></i>
               </button>
+              <button class="action-icon-btn" title="Email Order Details to bhaukorde1975@gmail.com" onclick="window.BK_CRM.resendOrderEmail('${esc(o.id)}')">
+                <i class="bi bi-envelope-fill"></i>
+              </button>
               <button class="btn-whatsapp" title="Send WhatsApp Message" onclick="window.BK_CRM.sendOrderWhatsApp('${esc(o.id)}')">
                 <i class="bi bi-whatsapp"></i>
               </button>
@@ -1749,6 +1764,9 @@
         <button type="button" class="btn-outline" onclick="window.BK_CRM.copyCurrentNotification()">
           <i class="bi bi-clipboard"></i> Copy Message Text
         </button>
+        <button type="button" class="btn-primary" style="background:#c8501e;border-color:#c8501e;" onclick="window.BK_CRM.sendCurrentNotificationEmail()">
+          <i class="bi bi-envelope-fill"></i> Send Email to bhaukorde1975@gmail.com
+        </button>
       </div>
     `;
   }
@@ -2210,8 +2228,7 @@
     if (rzpForm) {
       const isEnabled = s.razorpayEnabled !== false;
       const rzpMode = s.razorpayMode || "live";
-      const keyId = s.razorpayKeyId || (window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayKeyId) || "";
-      const keySec = s.razorpayKeySecret || (window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayKeySecret) || "";
+      const keyId = s.razorpayKeyId || (window.BHAU_CONFIG && window.BHAU_CONFIG.razorpayKeyId) || "rzp_live_U4HhHneqSk9NoP";
 
       const elEnabled = document.getElementById("setRzpEnabled");
       if (elEnabled) elEnabled.checked = isEnabled;
@@ -2219,8 +2236,6 @@
       if (elMode) elMode.value = rzpMode;
       const elKeyId = document.getElementById("setRzpKeyId");
       if (elKeyId) elKeyId.value = keyId;
-      const elKeySec = document.getElementById("setRzpKeySecret");
-      if (elKeySec) elKeySec.value = keySec;
       const elMName = document.getElementById("setRzpMerchantName");
       if (elMName) elMName.value = s.razorpayMerchantName || s.storeName || "Bhau Korde Masale";
       const elThemeColor = document.getElementById("setRzpThemeColor");
@@ -2269,6 +2284,89 @@
       const kbUsed = Math.round(totalBytes / 1024);
       quotaMeter.innerHTML = `<b style="color:var(--success)">${kbUsed} KB</b> used of 5,120 KB quota (<b>Healthy & Persisted</b>)`;
     }
+
+    // Automated Email & SMTP Notification Settings
+    const smtpForm = document.getElementById("crmSmtpSettingsForm");
+    if (smtpForm) {
+      const elRecip = document.getElementById("setNotifRecipient");
+      if (elRecip) elRecip.value = s.notificationEmail || "bhaukorde1975@gmail.com";
+      const elHost = document.getElementById("setSmtpHost");
+      if (elHost) elHost.value = s.smtpHost || "smtp.gmail.com";
+      const elUser = document.getElementById("setSmtpUser");
+      if (elUser) elUser.value = s.smtpUser || "bhaukorde1975@gmail.com";
+      const elPass = document.getElementById("setSmtpPass");
+      if (elPass) elPass.value = s.smtpPass || "";
+
+      const elTrigOrder = document.getElementById("notifTriggerOrder");
+      if (elTrigOrder) elTrigOrder.checked = s.notifTriggerOrder !== false;
+      const elTrigInq = document.getElementById("notifTriggerInquiry");
+      if (elTrigInq) elTrigInq.checked = s.notifTriggerInquiry !== false;
+      const elTrigFail = document.getElementById("notifTriggerFailedPay");
+      if (elTrigFail) elTrigFail.checked = s.notifTriggerFailedPay !== false;
+      const elTrigStock = document.getElementById("notifTriggerLowStock");
+      if (elTrigStock) elTrigStock.checked = s.notifTriggerLowStock !== false;
+      const elTrigCust = document.getElementById("notifTriggerCustReceipt");
+      if (elTrigCust) elTrigCust.checked = s.notifTriggerCustReceipt !== false;
+
+      const smtpBadge = document.getElementById("smtpStatusBadge");
+      if (smtpBadge) {
+        const target = s.notificationEmail || "bhaukorde1975@gmail.com";
+        smtpBadge.innerHTML = `<i class="bi bi-check-circle-fill"></i> Notifications Routed to ${esc(target)}`;
+      }
+    }
+
+    renderEmailAuditLogs();
+  }
+
+  function renderEmailAuditLogs() {
+    const wrap = document.getElementById("emailAuditLogsTable");
+    if (!wrap) return;
+
+    const logs = (window.BK_MAILER && typeof window.BK_MAILER.getEmailLogs === "function")
+      ? window.BK_MAILER.getEmailLogs()
+      : [];
+
+    if (!logs.length) {
+      wrap.innerHTML = `<div style="padding:18px;text-align:center;color:var(--muted);font-size:12.5px;">
+        <i class="bi bi-inbox" style="font-size:22px;display:block;margin-bottom:6px;opacity:0.6;"></i>
+        No email notifications logged in current session. Book an order or click <b>"Send Test Email"</b> above to test delivery.
+      </div>`;
+      return;
+    }
+
+    const rows = logs.map(l => {
+      let badge = '<span class="status-badge" style="background:rgba(21,128,61,0.12);color:#15803d;border:1px solid rgba(21,128,61,0.3)">DELIVERED</span>';
+      if (l.status === "failed") {
+        badge = '<span class="status-badge badge-danger">FAILED</span>';
+      } else if (l.status === "logged_offline") {
+        badge = '<span class="status-badge" style="background:rgba(2,132,199,0.12);color:#0284c7;border:1px solid rgba(2,132,199,0.3)">LOGGED</span>';
+      }
+
+      return `
+        <tr style="border-bottom:1px solid var(--line);font-size:12px;">
+          <td style="padding:8px 12px;white-space:nowrap;"><b>${esc(l.formattedTime || l.timestamp)}</b></td>
+          <td style="padding:8px 12px;text-transform:uppercase;font-weight:600;color:var(--accent);">${esc(l.type)}</td>
+          <td style="padding:8px 12px;color:var(--fg-soft);">${esc(l.recipient)}</td>
+          <td style="padding:8px 12px;">${esc(l.subject)} <small style="display:block;color:var(--muted);">${esc(l.details)}</small></td>
+          <td style="padding:8px 12px;text-align:center;">${badge}</td>
+        </tr>
+      `;
+    }).join("");
+
+    wrap.innerHTML = `
+      <table style="width:100%;border-collapse:collapse;text-align:left;">
+        <thead>
+          <tr style="background:var(--soft);border-bottom:1px solid var(--line);font-size:11px;color:var(--muted);text-transform:uppercase;">
+            <th style="padding:8px 12px;">Time</th>
+            <th style="padding:8px 12px;">Event</th>
+            <th style="padding:8px 12px;">Target Mail</th>
+            <th style="padding:8px 12px;">Subject / Details</th>
+            <th style="padding:8px 12px;text-align:center;">Status</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
   }
 
   // ==========================================================================
@@ -3736,6 +3834,49 @@
     }
   }
 
+  function sendCurrentNotificationEmail() {
+    const selectedOrderId = document.getElementById("notifOrderSelect") ? document.getElementById("notifOrderSelect").value : null;
+    const order = state.orders.find(o => o.id === selectedOrderId) || state.orders[0];
+    if (!order) {
+      toast("No order available to send email for.", "error");
+      return;
+    }
+    const targetEmail = (window.BK_MAILER && window.BK_MAILER.getTargetEmail()) || "bhaukorde1975@gmail.com";
+    if (window.BK_MAILER && typeof window.BK_MAILER.notifyOrder === "function") {
+      window.BK_MAILER.notifyOrder(order).then(res => {
+        toast(`Notification email dispatched to ${targetEmail}!`);
+        renderEmailAuditLogs();
+      });
+    } else {
+      toast(`Notification recorded for ${targetEmail}`);
+    }
+  }
+
+  function resendOrderEmail(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) {
+      toast("Order not found.", "error");
+      return;
+    }
+    const targetEmail = (window.BK_MAILER && window.BK_MAILER.getTargetEmail()) || "bhaukorde1975@gmail.com";
+    if (window.BK_MAILER && typeof window.BK_MAILER.notifyOrder === "function") {
+      window.BK_MAILER.notifyOrder(order).then(res => {
+        toast(`Order #${order.id} email dispatched to ${targetEmail}!`);
+        renderEmailAuditLogs();
+      });
+    }
+  }
+
+  function clearEmailAuditLogs() {
+    if (confirm("Clear all recorded email notification logs?")) {
+      if (window.BK_MAILER && typeof window.BK_MAILER.clearEmailLogs === "function") {
+        window.BK_MAILER.clearEmailLogs();
+      }
+      renderEmailAuditLogs();
+      toast("Email notification logs cleared.");
+    }
+  }
+
   function dispatchNotificationWhatsApp(phone, encodedMsg) {
     const clean = phone.replace(/[^0-9]/g, "");
     const formatted = clean.startsWith("91") ? clean : "91" + clean;
@@ -4199,7 +4340,12 @@
       orders: state.orders,
       customers: state.customers,
       inquiries: state.inquiries,
-      settings: state.settings,
+      settings: (() => {
+        const clean = Object.assign({}, state.settings);
+        delete clean.razorpayKeySecret;
+        delete clean.smtpPass;
+        return clean;
+      })(),
       returns: state.returns,
       tickets: state.tickets,
       reviews: state.reviews,
@@ -4433,8 +4579,7 @@
         e.preventDefault();
         state.settings.razorpayEnabled = document.getElementById("setRzpEnabled") ? document.getElementById("setRzpEnabled").checked : true;
         state.settings.razorpayMode = document.getElementById("setRzpMode") ? document.getElementById("setRzpMode").value : "live";
-        state.settings.razorpayKeyId = document.getElementById("setRzpKeyId") ? document.getElementById("setRzpKeyId").value.trim() : "";
-        state.settings.razorpayKeySecret = document.getElementById("setRzpKeySecret") ? document.getElementById("setRzpKeySecret").value.trim() : "";
+        state.settings.razorpayKeyId = document.getElementById("setRzpKeyId") ? document.getElementById("setRzpKeyId").value.trim() : "rzp_live_U4HhHneqSk9NoP";
         state.settings.razorpayMerchantName = document.getElementById("setRzpMerchantName") ? document.getElementById("setRzpMerchantName").value.trim() : "Bhau Korde Masale";
         state.settings.razorpayThemeColor = document.getElementById("setRzpThemeColor") ? document.getElementById("setRzpThemeColor").value : "#c8501e";
 
@@ -4443,6 +4588,76 @@
         toast("Razorpay payment gateway configuration saved!");
       });
     }
+
+    // Automated Email & SMTP Notification Settings form
+    const smtpForm = document.getElementById("crmSmtpSettingsForm");
+    if (smtpForm) {
+      smtpForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        state.settings.notificationEmail = document.getElementById("setNotifRecipient") ? document.getElementById("setNotifRecipient").value.trim() : "bhaukorde1975@gmail.com";
+        state.settings.smtpHost = document.getElementById("setSmtpHost") ? document.getElementById("setSmtpHost").value.trim() : "smtp.gmail.com";
+        state.settings.smtpUser = document.getElementById("setSmtpUser") ? document.getElementById("setSmtpUser").value.trim() : "bhaukorde1975@gmail.com";
+        state.settings.smtpPass = document.getElementById("setSmtpPass") ? document.getElementById("setSmtpPass").value.trim() : "";
+
+        state.settings.notifTriggerOrder = document.getElementById("notifTriggerOrder") ? document.getElementById("notifTriggerOrder").checked : true;
+        state.settings.notifTriggerInquiry = document.getElementById("notifTriggerInquiry") ? document.getElementById("notifTriggerInquiry").checked : true;
+        state.settings.notifTriggerFailedPay = document.getElementById("notifTriggerFailedPay") ? document.getElementById("notifTriggerFailedPay").checked : true;
+        state.settings.notifTriggerLowStock = document.getElementById("notifTriggerLowStock") ? document.getElementById("notifTriggerLowStock").checked : true;
+        state.settings.notifTriggerCustReceipt = document.getElementById("notifTriggerCustReceipt") ? document.getElementById("notifTriggerCustReceipt").checked : true;
+
+        saveData(STORAGE.SETTINGS, state.settings);
+        renderSettings();
+        toast("Notification & SMTP settings successfully saved!");
+      });
+    }
+
+    // Toggle SMTP Password view
+    const btnToggleSmtpPass = document.getElementById("btnToggleSmtpPass");
+    if (btnToggleSmtpPass) {
+      btnToggleSmtpPass.addEventListener("click", function () {
+        const inp = document.getElementById("setSmtpPass");
+        if (!inp) return;
+        const isPass = inp.type === "password";
+        inp.type = isPass ? "text" : "password";
+        this.innerHTML = isPass ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+      });
+    }
+
+    // Send Test Email Button
+    const btnSendTest = document.getElementById("btnSendTestEmail");
+    if (btnSendTest) {
+      btnSendTest.addEventListener("click", async function () {
+        const recip = (document.getElementById("setNotifRecipient")?.value || state.settings.notificationEmail || "bhaukorde1975@gmail.com").trim();
+        const fb = document.getElementById("testEmailFeedback");
+        if (fb) {
+          fb.style.color = "var(--accent)";
+          fb.innerHTML = `<i class="bi bi-hourglass-split"></i> Sending test email to ${recip}...`;
+        }
+
+        if (window.BK_MAILER && typeof window.BK_MAILER.sendTestEmail === "function") {
+          const res = await window.BK_MAILER.sendTestEmail(recip);
+          if (res.success) {
+            if (fb) {
+              fb.style.color = "var(--success)";
+              fb.innerHTML = `<i class="bi bi-check-circle-fill"></i> Test email delivered to ${recip}!`;
+            }
+            toast(`Test email successfully sent to ${recip}!`);
+          } else {
+            if (fb) {
+              fb.style.color = "var(--danger)";
+              fb.innerHTML = `<i class="bi bi-exclamation-circle-fill"></i> ${res.error || "Failed"}`;
+            }
+            toast(`Test email failed: ${res.error || "Check SMTP settings"}`, "error");
+          }
+        }
+        renderEmailAuditLogs();
+      });
+    }
+
+    // Listen to real-time email logging events
+    window.addEventListener("bk_email_logged", function () {
+      renderEmailAuditLogs();
+    });
 
     // Role switcher
     const roleSelect = document.getElementById("setRbacRoleSelect");
@@ -4466,6 +4681,10 @@
 
   // Public Interface for Inline Handlers
   window.BK_CRM = {
+    sendCurrentNotificationEmail,
+    resendOrderEmail,
+    clearEmailAuditLogs,
+    renderEmailAuditLogs,
     openAddProductModal,
     openEditProductModal,
     transliterateToMarathi,

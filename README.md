@@ -56,8 +56,47 @@ This repository contains the complete responsive storefront and **Staff CRM & Co
    - **Direct Payment Links**: 1-click button in CRM Orders to generate and send secure online payment links to WhatsApp customers.
    - **Invoicing & Billing**: Tax invoices and packing slips automatically display Razorpay Transaction IDs and payment settlement status.
    - **CSV Accounting**: Exports transaction references and payment statuses for accounting and GST filing.
+9. **Automated Email & SMTP Notification Engine (`bhaukorde1975@gmail.com`)**:
+   - **Instant Order Booking Alerts**: Automatically sends full order notification emails to `bhaukorde1975@gmail.com` for both Cash on Delivery (COD) and Razorpay online payments.
+   - **Lead Inquiries**: Delivers contact form messages directly to your inbox.
+   - **Payment Failure Alerts**: Immediate alerts when an online checkout drops off or is declined so you can recover lost sales.
+   - **Staff CRM Email Gateway**: Manage recipient, SMTP host/port, trigger toggles, and test email delivery with live status logs.
+   - **100% Credential Security**: Private Razorpay Key Secret and Gmail App Password are kept in gitignored `.env` on the server backend—never exposed in Git or browser code.
 
 ---
+
+## 🚀 Running the Store & SMTP Server
+
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Configure your credentials in `.env`**:
+   Copy `.env.example` to `.env` (it is already in `.gitignore`):
+   ```env
+   PORT=3000
+   NOTIFICATION_EMAIL=bhaukorde1975@gmail.com
+
+   # Razorpay Credentials
+   RAZORPAY_KEY_ID=rzp_live_your_key_id
+   RAZORPAY_KEY_SECRET=your_private_key_secret
+
+   # Gmail SMTP Credentials
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_SECURE=true
+   SMTP_USER=bhaukorde1975@gmail.com
+   SMTP_PASS=your_16_char_google_app_password
+   ```
+   > **Note on Gmail SMTP**: Generate a 16-character App Password at [Google Account > Security > 2-Step Verification > App Passwords](https://myaccount.google.com/apppasswords).
+
+3. **Start the server**:
+   ```bash
+   npm start
+   ```
+   The site will be live at `http://localhost:3000` with automated SMTP dispatch active.
+
 
 ## 🔐 Staff CRM Login
 
