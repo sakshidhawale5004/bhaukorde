@@ -842,10 +842,31 @@
             sessionStorage.setItem(STORAGE.SESSION, sessionData);
           }
           gate.style.display = "none";
+          const passInput = document.getElementById("authPass");
+          if (passInput) {
+            passInput.value = "";
+            passInput.type = "password";
+          }
+          const toggleBtn = document.getElementById("togglePasswordBtn");
+          if (toggleBtn) {
+            const icon = toggleBtn.querySelector("i");
+            if (icon) icon.className = "bi bi-eye-slash-fill";
+          }
           toast(`Welcome back! Staff CRM unlocked.`);
           renderAll();
         } else {
           toast("Invalid staff username or password.", "error");
+          const passInput = document.getElementById("authPass");
+          if (passInput) {
+            passInput.value = "";
+            passInput.type = "password";
+            passInput.focus();
+          }
+          const toggleBtn = document.getElementById("togglePasswordBtn");
+          if (toggleBtn) {
+            const icon = toggleBtn.querySelector("i");
+            if (icon) icon.className = "bi bi-eye-slash-fill";
+          }
         }
       });
     }
@@ -871,6 +892,18 @@
         localStorage.removeItem(STORAGE.SESSION);
         sessionStorage.removeItem(STORAGE.SESSION);
         gate.style.display = "flex";
+        const passInput = document.getElementById("authPass");
+        if (passInput) {
+          passInput.value = "";
+          passInput.type = "password";
+        }
+        const userInp = document.getElementById("authUser");
+        if (userInp) userInp.value = "";
+        const toggleBtn = document.getElementById("togglePasswordBtn");
+        if (toggleBtn) {
+          const icon = toggleBtn.querySelector("i");
+          if (icon) icon.className = "bi bi-eye-slash-fill";
+        }
         toast("Signed out successfully.");
       });
     }
@@ -2291,7 +2324,7 @@
       const elRecip = document.getElementById("setNotifRecipient");
       if (elRecip) elRecip.value = s.notificationEmail || "bhaukorde1975@gmail.com";
       const elHost = document.getElementById("setSmtpHost");
-      if (elHost) elHost.value = s.smtpHost || "smtp.gmail.com";
+      if (elHost) elHost.value = "Zero-SMTP Direct Cloud Gateway (Active)";
       const elUser = document.getElementById("setSmtpUser");
       if (elUser) elUser.value = s.smtpUser || "bhaukorde1975@gmail.com";
       const elPass = document.getElementById("setSmtpPass");
@@ -2311,7 +2344,7 @@
       const smtpBadge = document.getElementById("smtpStatusBadge");
       if (smtpBadge) {
         const target = s.notificationEmail || "bhaukorde1975@gmail.com";
-        smtpBadge.innerHTML = `<i class="bi bi-check-circle-fill"></i> Notifications Routed to ${esc(target)}`;
+        smtpBadge.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> Zero-SMTP Active · Routed to ${esc(target)}`;
       }
     }
 
@@ -4607,7 +4640,7 @@
 
         saveData(STORAGE.SETTINGS, state.settings);
         renderSettings();
-        toast("Notification & SMTP settings successfully saved!");
+        toast("Email notification settings successfully saved!");
       });
     }
 

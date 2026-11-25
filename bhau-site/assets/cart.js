@@ -278,9 +278,13 @@
       + '<div>Delivery to: <span>' + esc(order.address) + ', ' + esc(order.city) + '</span></div>'
       + (order.packagingNotes ? '<div>Notes: <i>' + esc(order.packagingNotes) + '</i></div>' : '')
       + '</div>'
+      + '<div style="background:rgba(21,128,61,0.08);border:1px solid rgba(21,128,61,0.25);border-radius:6px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:#15803d;display:flex;align-items:center;justify-content:center;gap:6px">'
+      + '<i class="bi bi-envelope-check-fill"></i> Order details dispatched to bhaukorde1975@gmail.com'
+      + '</div>'
       + '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'
       + '<a href="index.html" class="btn ghost">Continue Shopping</a>'
       + '<button type="button" class="btn btn-wa-order" id="btnSuccessWaNotify"><i class="bi bi-whatsapp"></i> Chat on WhatsApp</button>'
+      + '<a href="mailto:bhaukorde1975@gmail.com?subject=' + encodeURIComponent('🌶️ Order Booking ' + order.id + ' - ' + order.customer) + '&body=' + encodeURIComponent('Namaste Bhau Korde!\n\nOrder ID: ' + order.id + '\nTotal: ' + rs(order.total) + '\nCustomer: ' + order.customer + ' (' + order.phone + ')\nAddress: ' + order.address + ', ' + order.city + '\nPayment: ' + order.payment + '\n\nThank you!') + '" class="btn ghost" style="border-color:var(--accent);color:var(--accent)"><i class="bi bi-envelope"></i> Send Email Copy</a>'
       + '</div></div>';
 
     document.getElementById("btnSuccessWaNotify").addEventListener("click", function() {

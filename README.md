@@ -56,12 +56,13 @@ This repository contains the complete responsive storefront and **Staff CRM & Co
    - **Direct Payment Links**: 1-click button in CRM Orders to generate and send secure online payment links to WhatsApp customers.
    - **Invoicing & Billing**: Tax invoices and packing slips automatically display Razorpay Transaction IDs and payment settlement status.
    - **CSV Accounting**: Exports transaction references and payment statuses for accounting and GST filing.
-9. **Automated Email & SMTP Notification Engine (`bhaukorde1975@gmail.com`)**:
-   - **Instant Order Booking Alerts**: Automatically sends full order notification emails to `bhaukorde1975@gmail.com` for both Cash on Delivery (COD) and Razorpay online payments.
-   - **Lead Inquiries**: Delivers contact form messages directly to your inbox.
-   - **Payment Failure Alerts**: Immediate alerts when an online checkout drops off or is declined so you can recover lost sales.
-   - **Staff CRM Email Gateway**: Manage recipient, SMTP host/port, trigger toggles, and test email delivery with live status logs.
-   - **100% Credential Security**: Private Razorpay Key Secret and Gmail App Password are kept in gitignored `.env` on the server backend—never exposed in Git or browser code.
+9. **Zero-SMTP Direct Email Notification Engine (`bhaukorde1975@gmail.com`)**:
+   - **Zero Configuration Required**: Uses a direct cloud email gateway (FormSubmit API) so all order bookings, customer details, and inquiries arrive in your inbox without needing Google App passwords, SMTP ports, or running backend server processes.
+   - **Instant Order Booking Alerts**: Automatically delivers full order breakdowns to `bhaukorde1975@gmail.com` for both Cash on Delivery (COD) and Razorpay online payments.
+   - **Customer Lead Inquiries**: Delivers contact form messages and inquiries directly to your inbox.
+   - **Payment Failure Alerts**: Immediate alerts when an online checkout drops off or is declined so you can follow up with customers.
+   - **Staff CRM Email Gateway**: Manage recipient, triggers, and trigger test email delivery with live audit logs in the CRM.
+   - **Customer Email Receipt**: Automatic email copy button in checkout modal for customer convenience.
 
 ---
 
