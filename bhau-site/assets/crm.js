@@ -1011,6 +1011,7 @@
     if (sidebar) sidebar.classList.remove("open");
     if (backdrop) backdrop.classList.remove("active");
 
+    syncFromStorage(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -4446,6 +4447,66 @@
   }
 
   // ==========================================================================
+  // REAL-TIME CROSS-TAB SYNCHRONIZATION & AUDIO CHIME
+  // ==========================================================================
+  function playNotificationChime() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12); // A5
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.35);
+    } catch (e) {}
+  }
+
+  let syncDebounceTimer = null;
+  function syncFromStorage(notifyNewOrder = true) {
+    clearTimeout(syncDebounceTimer);
+    syncDebounceTimer = setTimeout(() => {
+      const prevOrderIds = new Set((state.orders || []).map((o) => o.id));
+      const prevOrdersJson = JSON.stringify(state.orders || []);
+      const prevProductsJson = JSON.stringify(state.products || []);
+      const prevCustomersJson = JSON.stringify(state.customers || []);
+      const prevInquiriesJson = JSON.stringify(state.inquiries || []);
+
+      loadData();
+
+      const currentOrdersJson = JSON.stringify(state.orders || []);
+      const currentProductsJson = JSON.stringify(state.products || []);
+      const currentCustomersJson = JSON.stringify(state.customers || []);
+      const currentInquiriesJson = JSON.stringify(state.inquiries || []);
+
+      const hasChanged =
+        currentOrdersJson !== prevOrdersJson ||
+        currentProductsJson !== prevProductsJson ||
+        currentCustomersJson !== prevCustomersJson ||
+        currentInquiriesJson !== prevInquiriesJson;
+
+      if (hasChanged) {
+        renderAll();
+
+        if (notifyNewOrder) {
+          const addedOrders = (state.orders || []).filter((o) => !prevOrderIds.has(o.id));
+          if (addedOrders.length > 0) {
+            const latest = addedOrders[addedOrders.length - 1];
+            toast(`🔔 New storefront order received: ${latest.id} · ${latest.customer} (${rs(latest.total)})`, "success");
+            playNotificationChime();
+          }
+        }
+      }
+    }, 50);
+  }
+
+  // ==========================================================================
   // INITIALIZATION & EVENT LISTENERS
   // ==========================================================================
   document.addEventListener("DOMContentLoaded", function () {
@@ -4710,6 +4771,29 @@
 
     // Initial render
     renderAll();
+
+    // ==========================================================================
+    // Real-Time Cross-Tab Live Storage Event Listeners
+    // ==========================================================================
+    window.addEventListener("storage", function (e) {
+      if (!e.key || e.key.startsWith("bk_crm_")) {
+        syncFromStorage(true);
+      }
+    });
+
+    window.addEventListener("focus", function () {
+      syncFromStorage(false);
+    });
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") {
+        syncFromStorage(false);
+      }
+    });
+
+    window.addEventListener("bk_order_placed", function () {
+      syncFromStorage(true);
+    });
   });
 
   // Public Interface for Inline Handlers
@@ -4800,6 +4884,7 @@
     exportReturnsCSV,
     exportCustomersCSV,
     exportFullBackupJSON,
-    resetToDefaultCatalog
+    resetToDefaultCatalog,
+    syncFromStorage: () => syncFromStorage(false)
   };
 })();

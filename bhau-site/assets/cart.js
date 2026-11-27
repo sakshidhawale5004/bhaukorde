@@ -362,6 +362,7 @@
       var orders = JSON.parse(localStorage.getItem("bk_crm_orders") || "[]");
       orders.push(newOrder);
       localStorage.setItem("bk_crm_orders", JSON.stringify(orders));
+      window.dispatchEvent(new CustomEvent("bk_order_placed", { detail: newOrder }));
     } catch(e) {}
 
     // Update CRM Customers
@@ -534,6 +535,7 @@
       var orders = JSON.parse(localStorage.getItem("bk_crm_orders") || "[]");
       orders.push(newOrder);
       localStorage.setItem("bk_crm_orders", JSON.stringify(orders));
+      window.dispatchEvent(new CustomEvent("bk_order_placed", { detail: newOrder }));
     } catch(e) {}
 
     // Update CRM Customers
